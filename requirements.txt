@@ -1,0 +1,6 @@
+ langchain
+ pyPDF2
+ openai
+ faiss-cpu
+ flask
+ gunicorn
