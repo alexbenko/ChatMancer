@@ -23,7 +23,7 @@ export type CustomNextPage = NextPage & {
 const clientSideEmotionCache = createEmotionCache();
 
 export default function MyApp(props: any) {
-  const companyName = "Athena";
+  const companyName = "AskGPT-PDF";
   const description = "Ask GPT questions a bout the uploaded PDFS";
   const slogan = "Best Company";
   const address = "123 Main St";
@@ -75,8 +75,8 @@ export default function MyApp(props: any) {
                       }
                     ],
                     locale: 'en_US',
-                    url:'https://pacificshrooms.earth/',
-                    site_name: "Pacific Mushrooms",
+                    url: '',
+                    site_name: companyName,
                   }}
               />
               <ResponsiveNavBar projectOptions={projectOptions}/>

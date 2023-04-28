@@ -295,7 +295,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
+.submitButton:disabled {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  cursor: default;
+}
 .submitButton:hover {
   background-color: #0056b3;
   border-color: #0056b3;
