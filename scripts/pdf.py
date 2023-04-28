@@ -42,6 +42,7 @@ def create_faiss_index(documents, embeddings):
     return FAISS.from_documents(documents, embeddings)
 
 def run_pdf_based_qa(question):
+    os.environ["OPENAI_API_KEY"] = "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"
     text_splitter  = CharacterTextSplitter(
         separator = "\n",
         chunk_size = 1000,

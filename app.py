@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 from scripts.pdf import run_pdf_based_qa
-import shutil
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'data'  # Set the folder where PDF files will be stored
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # Set the allowed file extensions for uploads
@@ -39,14 +39,18 @@ def upload_pdfs():
         answer = run_pdf_based_qa(question)
 
         # Check the environment variable and conditionally delete the uploaded files
-        should_delete_files = os.environ.get('DELETE_UPLOADED_FILES', 'true').lower() == 'true'
-        if should_delete_files:
-            delete_uploaded_files(files, app.config['UPLOAD_FOLDER'])
+        #should_delete_files = os.environ.get('DELETE_UPLOADED_FILES', 'true').lower() == 'true'
+        #if should_delete_files:
+        delete_uploaded_files(files, app.config['UPLOAD_FOLDER'])
         return jsonify({"answer": answer})
+
+@app.route('/_next/<path:path>')
+def serve_next_assets(path):
+    return send_from_directory('static/web/_next', path)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_from_directory('static/web', 'index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

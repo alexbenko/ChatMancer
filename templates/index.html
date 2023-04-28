@@ -8,19 +8,9 @@
 </head>
 <body>
   <div id='root'>
-    <div class="owl-container">
-      <h1>Athena: PDF-based Question Answering</h1>
-      <div class="owl">
-          <div class="eye left">
-            <div class="pupil"></div>
-          </div>
-          <div class="eye right">
-            <div class="pupil"></div>
-          </div>
-          <div class="beak"></div>
-      </div>
-    </div>
 
+    <h1>Athena: PDF-based Question Answering</h1>
+    <img src="{{ url_for('static', filename='athena.png') }}">
     <div class="container">
       <form id="pdfUploadForm">
           <label for="pdfFiles">Upload PDF files:</label>
@@ -30,12 +20,13 @@
           <input type="text" id="question" name="question" required>
           <br><br>
           <input id='submit-button' type="submit" value="Submit">
-      </form>
+       </form>
       <br>
       <h2>Answer:</h2>
       <pre id="answer"></pre>
     </div>
   </div>
+
 
 
     <script>
