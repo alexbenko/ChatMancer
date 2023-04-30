@@ -4,3 +4,5 @@
  faiss-cpu
  flask
  gunicorn
+ tiktoken
+pypdf

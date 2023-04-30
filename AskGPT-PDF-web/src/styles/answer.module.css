@@ -1,0 +1,11 @@
+.answer {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-width: 90%;
+}
+
+.titleContainer{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}

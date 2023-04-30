@@ -1,12 +1,14 @@
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { useState } from 'react'
+import { Answer } from '@/components/Answer'
+
 const inter = Inter({ subsets: ['latin'] })
 function Spinner(){
   return (
     <div style={{'margin': '0 auto'}}>
       <div className={styles.spinner}></div>
-      <div>Loading ...</div>
+      <div>Reading PDFs ...</div>
     </div>
   )
 }
@@ -39,11 +41,12 @@ export default function Home() {
         method: 'POST',
         body: formData,
       });
-
+      console.log(response)
       if (response.ok) {
         const result = await response.json();
         setAnswer(result.answer);
       } else {
+        console.log(response)
         setAnswer(`Error: ${response.statusText}`);
       }
     } catch (error: any) {
@@ -52,14 +55,13 @@ export default function Home() {
 
     setSubmitting(false);
   };
+
   return (
     <>
       <main className={styles.main}>
-        <div className={styles.root}>
-          <h1>Athena: PDF-based Question Answering</h1>
-          <div className={styles.card} style={{
-            'minWidth': '45%'
-          }}>
+        <div className={styles.root} style={{textAlign: 'center'}}>
+          <h1 style={{'paddingBottom': '1rem'}}>Ask GPT questions on your PDF files.</h1>
+          <div className={styles.card}>
             <form onSubmit={onFormSubmit} className={styles.textareaWrapper}>
               <label htmlFor="pdfFiles"  className={styles.textareaLabel}>Upload PDF files:</label>
               <input
@@ -88,16 +90,16 @@ export default function Home() {
               />
               <br />
               <br />
-              <button type="submit" className={styles.submitButton} disabled={submitting}>
+              {!submitting && <button type="submit" className={styles.submitButton} disabled={submitting}>
                 Submit
-              </button>
+              </button>}
+              {submitting && <Spinner />}
             </form>
           </div>
-          {submitting && <Spinner />}
-          {answer &&
+
+          {!!answer.length &&
             <div className={styles.card}>
-              <h2>Answer:</h2>
-              <pre className={styles.answer}>{answer}</pre>
+              <Answer answer={answer}/>
             </div>
           }
         </div>

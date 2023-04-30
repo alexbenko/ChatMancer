@@ -3,7 +3,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 6rem;
+  padding: 2rem;
   min-height: 100vh;
 }
 
@@ -52,6 +52,7 @@
   background: rgba(var(--card-rgb), 0);
   border: 1px solid rgba(var(--card-border-rgb), 0);
   transition: background 200ms, border 200ms;
+  min-width: 75%;
 }
 
 .card span {
@@ -238,11 +239,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.answer {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  max-width: 100%;
-}
 
 .root {
   display: flex;

@@ -8,9 +8,6 @@ from langchain.vectorstores import FAISS
 from concurrent.futures import ThreadPoolExecutor
 import concurrent.futures
 
-#pip3 install langchain pyPDF2 openai faiss-cpu
-
-
 def get_pdf_files(pdf_directory):
     """Get a list of PDF files from the specified directory."""
     return [f for f in os.listdir(pdf_directory) if f.endswith('.pdf')]
@@ -42,7 +39,6 @@ def create_faiss_index(documents, embeddings):
     return FAISS.from_documents(documents, embeddings)
 
 def run_pdf_based_qa(question):
-    os.environ["OPENAI_API_KEY"] = "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"
     text_splitter  = CharacterTextSplitter(
         separator = "\n",
         chunk_size = 1000,
@@ -74,10 +70,3 @@ def run_pdf_based_qa(question):
 
     # Return the answer
     return message
-
-
-# Example usage:
-#question = "What is the Proposed Treatment Management Plan ? Also translate it into spanish"
-#print(f'Question: ', question)
-#answer = run_pdf_based_qa(question)
-#print(f'Response: ',answer)

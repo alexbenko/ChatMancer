@@ -7,10 +7,11 @@ import { CacheProvider } from '@emotion/react';
 import createEmotionCache from '@/lib/createEmotionCache';
 import { Container, useMediaQuery } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { SnackbarProvider } from "notistack";
+import { SnackbarOrigin, SnackbarProvider } from "notistack";
 import { DefaultSeo } from 'next-seo';
 import ResponsiveNavBar from '@/components/Navbar';
 import { NextPage } from 'next';
+import useIsMobile from '@/hooks/useIsMobile';
 
 export interface PageProps {
   projectOptions: CreateProjectOptions;
@@ -28,7 +29,9 @@ export default function MyApp(props: any) {
   const slogan = "Best Company";
   const address = "123 Main St";
   const logoPath = "{{LOGO_PATH}}";
+  const isMobile = useIsMobile()
 
+  const snackConfig: SnackbarOrigin = isMobile ? {vertical: 'top',horizontal: 'center'} : {vertical: 'bottom', horizontal: 'right'}
   const projectOptions: CreateProjectOptions = {
     companyName: companyName,
     slogan: slogan,
@@ -54,9 +57,10 @@ export default function MyApp(props: any) {
         <title>{companyName}</title>
         <meta name="description" content={description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="shortcut icon" href="/static/robo.svg" />
       </Head>
       <ThemeProvider theme={theme}>
-        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top',horizontal: 'center' }}>
+        <SnackbarProvider maxSnack={3} anchorOrigin={snackConfig}>
 
               <CssBaseline />
               {/**TODO: ABSTRACT THIS SO THE OBJECT VALUES CAN BE SET THROUGH ENVIORNMENT VARIABLES/Object properties */}
@@ -79,7 +83,6 @@ export default function MyApp(props: any) {
                     site_name: companyName,
                   }}
               />
-              <ResponsiveNavBar projectOptions={projectOptions}/>
               <Container component={"div"} className="pageContainer">
                 <Component {...pageProps} projectOptions={projectOptions}/>
               </Container>

@@ -3,7 +3,7 @@ from werkzeug.utils import secure_filename
 import os
 from scripts.pdf import run_pdf_based_qa
 
-app = Flask(__name__)
+app = Flask(__name__,  static_folder='static')
 app.config['UPLOAD_FOLDER'] = 'data'  # Set the folder where PDF files will be stored
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # Set the allowed file extensions for uploads
 
@@ -38,15 +38,16 @@ def upload_pdfs():
 
         answer = run_pdf_based_qa(question)
 
-        # Check the environment variable and conditionally delete the uploaded files
-        #should_delete_files = os.environ.get('DELETE_UPLOADED_FILES', 'true').lower() == 'true'
-        #if should_delete_files:
         delete_uploaded_files(files, app.config['UPLOAD_FOLDER'])
         return jsonify({"answer": answer})
 
 @app.route('/_next/<path:path>')
 def serve_next_assets(path):
     return send_from_directory('static/web/_next', path)
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
 
 @app.route('/')
 def index():

@@ -21,7 +21,6 @@ function Copyright({ companyName, address }: CopyrightProps) {
       </MUILink>{' '}
       {new Date().getFullYear()}
       {'.'} <br />
-      {address}
     </Typography>
   );
 }

@@ -1,17 +1,34 @@
-# Use an official Python runtime as a parent image
+# Dockerfile
+# Stage 1: Build frontend
+FROM node:14 AS frontend-builder
+
+WORKDIR /app/AskGPT-PDF-web
+
+COPY AskGPT-PDF-web/package*.json ./
+RUN npm install
+
+COPY AskGPT-PDF-web/ .
+RUN npm run build && \
+    rm -rf /app/AskGPT-PDF-web
+
+# Stage 2: Set up Flask container
 FROM python:3.9-slim
 
-# Set the working directory to /app
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Create the data directory and set permissions
+RUN mkdir /app/data && \
+    chown -R www-data:www-data /app/data && \
+    chmod -R 770 /app/data
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 8000 available to the world outside this container
-EXPOSE 8000
+# Copy static folder contents from the root directory
+COPY static/ /app/static/
 
-# Run gunicorn when the container launches
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
+# Copy remaining application files
+COPY . .
+
+# Use Gunicorn for deployment
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--user=www-data", "--group=www-data", "--capture-output", "--enable-stdio-inheritance", "app:app"]
