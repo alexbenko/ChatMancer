@@ -11,4 +11,3 @@ services:
       - ./data:/app/data
     environment:
       - FLASK_ENV=production
-      - PYTHONUNBUFFERED=1

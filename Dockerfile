@@ -2,14 +2,14 @@
 # Stage 1: Build frontend
 FROM node:14 AS frontend-builder
 
-WORKDIR /app/AskGPT-PDF-web
+WORKDIR /app/web
 
-COPY AskGPT-PDF-web/package*.json ./
+COPY web/package*.json ./
 RUN npm install
 
-COPY AskGPT-PDF-web/ .
+COPY web/ .
 RUN npm run build && \
-    rm -rf /app/AskGPT-PDF-web
+    rm -rf /app/web
 
 # Stage 2: Set up Flask container
 FROM python:3.9-slim
