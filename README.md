@@ -12,7 +12,7 @@ Follow the instructions below to set up the project on your local machine for de
 
 1. Clone the repository:
     ```
-    git clone <repository-url>
+    git clone [<repository-url>](https://github.com/alexbenko/AskGPT.git)
     ```
 2. Navigate into the `web` directory and build the Next.js project:
     ```
@@ -53,7 +53,3 @@ Any contributions you make are greatly appreciated.
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-
-## Contact
-
-Your Name - Your Email
