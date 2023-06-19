@@ -22,7 +22,7 @@ Follow the instructions below to set up the project on your local machine for de
     ```
     Wait for the build process to complete.
 
-3. Ensure you have an API key from OpenAI. This will be used in the following step.
+3. Ensure you have an API key from OpenAI.
 
 4. Set up the required environment variable with your OpenAI API key:
     ```
