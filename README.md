@@ -21,7 +21,15 @@ Follow the instructions below to set up the project on your local machine for de
     ```
     git clone https://github.com/alexbenko/AskGPT.git
     ```
-2. Navigate into the `web` directory and build the Next.js project:
+    
+    ```
+    cd AskGPT
+    ```
+2. Install server dependencies:
+```
+pip install
+```
+3. Navigate into the `web` directory and build the Next.js project:
     ```
     cd web
     npm install
@@ -29,11 +37,11 @@ Follow the instructions below to set up the project on your local machine for de
     ```
     Wait for the build process to complete.
 
-3. Ensure you have an API key from OpenAI.
+4. Ensure you have an API key from OpenAI.
 
-4. Set up the required environment variable with your OpenAI API key:
+5. Set up the required environment variable with your OpenAI API key:
     ```
-    export OPEN_AI_KEY=your_openai_key
+    export OPENAI_API_KEY=your_openai_key
     ```
     Replace `your_openai_key` with your actual OpenAI key.
 
@@ -48,9 +56,9 @@ Follow the instructions below to set up the project on your local machine for de
 
 ## Built With
 
-- [Next.js](https://nextjs.org/) - A React Framework used for setting up TypeScript and exporting using `npm run build`
+- [Next.js](https://nextjs.org/) - A React Framework.
 - [TypeScript](https://www.typescriptlang.org/) - A statically typed superset of JavaScript
-- [Python](https://www.python.org/) - A high-level, interpreted programming language
+- [Python 3.11](https://www.python.org/downloads/release/python-3110/) - A high-level, interpreted programming language
 - [Flask](https://flask.palletsprojects.com/) - A micro web framework written in Python
 
 ## Contributing
