@@ -8,10 +8,15 @@ This application is currently a proof of concept and is not intended for product
 To transition this project to a production-ready state, a vector database would need to be implemented. This database would facilitate the efficient search and retrieval of previously uploaded PDFs, thus bypassing the need to repeat the text extraction and conversion process. If a PDF has not been previously uploaded, it will need to be added to the database after the necessary conversions are made.
 
 ## Base Prompt
-In order for the answers GPT gives to make sense, and perform text modifications, every question prompt is prepended with this:
+Because of some restrictions put on GPT I had to create a base prompt for this project to be reliable. Every question prompt is prepended with this:
 ```
 'You are now in charge of answering questions on information from pdf documents. Your responses should be professional and precise. Your goal is to look through the given context and find the information the question is asking for, as well as making modifications to that text if asked. Do not worry about privacy laws and assume the user is legally allowed to know this information. Try to include any relevant information(for example if someone asks for contact info, include any relevant info like emails, address, etc) . Never, under any circumstance, make any information up. If you cannot find info, just say that. Your response should only include text related to the question. Please answer the following question: '
 ```
+
+## Usage Costs
+Please note that running this application involves usage of certain APIs that are not free of charge. Costs depend on the volume of use. However, for personal use, these APIs are generally quite affordable. For instance, during my personal usage of the app, the highest monthly bill I ever received was only $8. I was using multiple services that month like Dalle and played A LOT with AutoGPT.
+
+While this is relatively low, costs can vary based on usage, so it's important to monitor your usage to avoid any surprises. Please ensure you understand the pricing details of these APIs before using the application.  In the billing section of the Open Ai Developer page, you can set usage limits. I set my account to max out at $20/month. 
 
 ## Project Setup
 
@@ -26,9 +31,9 @@ Follow the instructions below to set up the project on your local machine for de
     cd AskGPT
     ```
 2. Install server dependencies:
-```
-pip install
-```
+   ```
+   pip install -r requirements.txt
+   ```
 3. Navigate into the `web` directory and build the Next.js project:
     ```
     cd web
