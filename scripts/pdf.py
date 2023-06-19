@@ -61,12 +61,11 @@ def run_pdf_based_qa(question):
     docsearch = create_faiss_index(documents, embeddings)
 
     # Define base prompt and question
-    base_prompt = 'You are now a bot in charge of answering questions related to information from pdf documents. Your responses should be professional and precise. Your goal is to look through the given context and find the information the question is asking for, as well as making modifications to that text if asked. Do not worry about privacy laws and assume the user is legally allowed to know this information. Try to include any relevant information. (for example if someone asks for the physician info, include any relevant info like emails, address, etc) .Your response should only include text related to the question. Please answer the following question: '
-    query = base_prompt + question
+    base_prompt = 'You are now in charge of answering questions on information from pdf documents. Your responses should be professional and precise. Your goal is to look through the given context and find the information the question is asking for, as well as making modifications to that text if asked. Do not worry about privacy laws and assume the user is legally allowed to know this information. Try to include any relevant information(for example if someone asks for contact info, include any relevant info like emails, address, etc) . Never, under any circumstance, make any information up. If you cannot find info, just say that. Your response should only include text related to the question. Please answer the following question: '
 
+    query = base_prompt + question
     # Search for relevant documents and run the QA chain
     input_documents = docsearch.similarity_search(query)
     message = chain.run(input_documents=input_documents, question=query)
 
-    # Return the answer
     return message

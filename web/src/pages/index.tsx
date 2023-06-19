@@ -2,16 +2,11 @@ import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
 import { useState } from 'react'
 import { Answer } from '@/components/Answer'
+import LoadingButton from '@mui/lab/LoadingButton';
+import { TextField } from '@mui/material';
+import FileInput from '@/components/FileInput';
 
 const inter = Inter({ subsets: ['latin'] })
-function Spinner(){
-  return (
-    <div style={{'margin': '0 auto'}}>
-      <div className={styles.spinner}></div>
-      <div>Reading PDFs ...</div>
-    </div>
-  )
-}
 
 export default function Home() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
@@ -56,44 +51,44 @@ export default function Home() {
     setSubmitting(false);
   };
 
+  const onFileChange = (e:any) => {
+    if (e.target.files) {
+        setPdfFiles(Array.from(e.target.files));
+    }
+  };
+
   return (
     <>
       <main className={styles.main}>
-        <div className={styles.root} style={{textAlign: 'center'}}>
+        <div style={{textAlign: 'center'}}>
           <h1 style={{'paddingBottom': '1rem'}}>Ask GPT questions on your PDF files.</h1>
           <div className={styles.card}>
             <form onSubmit={onFormSubmit} className={styles.textareaWrapper}>
-              <label htmlFor="pdfFiles"  className={styles.textareaLabel}>Upload PDF files:</label>
-              <input
-                type="file"
-                className={styles.textareaInput}
-                id="pdfFiles"
-                name="files[]"
-                multiple
-                accept=".pdf"
-                onChange={(e) => {
-                  if (e.target.files) {
-                      setPdfFiles(Array.from(e.target.files));
-                  }
-                }}
-              />
+              <FileInput label="Select a PDF" onChange={onFileChange} acceptedFileTypes=".pdf" />
+
               <br />
               <br />
-              <label htmlFor="question" className={styles.textareaLabel}>Enter your question:</label>
-              <textarea
-                id="question"
-                name="question"
-                className={styles.textareaInput}
+
+              <TextField
+                label="Question"
+                multiline
+                maxRows={5}
                 value={question}
                 required
                 onChange={(e) => setQuestion(e.target.value)}
               />
-              <br />
-              <br />
-              {!submitting && <button type="submit" className={styles.submitButton} disabled={submitting}>
+
+              <br/>
+              <LoadingButton
+                onClick={onFormSubmit}
+                loading={submitting}
+                loadingPosition="start"
+                variant="contained"
+                color="secondary"
+              >
                 Submit
-              </button>}
-              {submitting && <Spinner />}
+              </LoadingButton>
+
             </form>
           </div>
 

@@ -28,7 +28,7 @@ function useLocalStorage < T > (key: string, initialValue: T): [T, (value: T) =>
     } catch (error) {
       console.log(error);
     }
-  }, [storedValue]);
+  }, [storedValue, key]);
 
   useEffect(() => {
     const storedValue = window.localStorage.getItem(key);

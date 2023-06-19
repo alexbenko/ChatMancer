@@ -24,7 +24,7 @@ export function Answer({answer}: {answer: string}){
         </IconButton>
       </div>
 
-      <pre className={styles.answer}>{answer}</pre>
+      <div className={styles.answer}>{answer}</div>
     </>
   )
 }

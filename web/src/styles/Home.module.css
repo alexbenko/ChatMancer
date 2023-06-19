@@ -5,7 +5,6 @@
   align-items: center;
   padding: 2rem;
   min-height: 100vh;
-  max-width: 90vw;
 }
 
 .description {
@@ -53,8 +52,6 @@
   background: rgba(var(--card-rgb), 0);
   border: 1px solid rgba(var(--card-border-rgb), 0);
   transition: background 200ms, border 200ms;
-  min-width: 65%;
-  max-width: 75vw;
 }
 
 .card span {

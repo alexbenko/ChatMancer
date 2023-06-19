@@ -26,21 +26,15 @@ const clientSideEmotionCache = createEmotionCache();
 export default function MyApp(props: any) {
   const companyName = "AskGPT-PDF";
   const description = "Ask GPT questions about the uploaded PDFS";
-  const slogan = "Best Company";
-  const address = "123 Main St";
-  const logoPath = "{{LOGO_PATH}}";
+
   const isMobile = useIsMobile()
 
   const snackConfig: SnackbarOrigin = isMobile ?
-    {vertical: 'top',horizontal: 'center'}     :
-    {vertical: 'bottom', horizontal: 'right'}
-
+    { vertical: 'top', horizontal: 'center' }  :
+    { vertical: 'bottom',horizontal: 'right'}
 
   const projectOptions: CreateProjectOptions = {
     companyName: companyName,
-    slogan: slogan,
-    address: address,
-    logoPath: logoPath,
     description: description,
   };
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -67,26 +61,7 @@ export default function MyApp(props: any) {
         <SnackbarProvider maxSnack={3} anchorOrigin={snackConfig}>
 
               <CssBaseline />
-              {/**TODO: ABSTRACT THIS SO THE OBJECT VALUES CAN BE SET THROUGH ENVIORNMENT VARIABLES/Object properties */}
-              <DefaultSeo
-                title={companyName}
-                description={description}
-                  openGraph={{
-                    type: 'website',
-                    description: description,
-                    images : [
-                      {
-                        url: '/images/welcome.jpeg',
-                        width: 800,
-                        height: 600,
-                        alt: 'Amanita Muscara'
-                      }
-                    ],
-                    locale: 'en_US',
-                    url: '',
-                    site_name: companyName,
-                  }}
-              />
+
               <Container component={"div"} className="pageContainer">
                 <Component {...pageProps} projectOptions={projectOptions}/>
               </Container>

@@ -1,5 +1,5 @@
 {
-  "name": "AskGPT-PDF",
+  "name": "AskGPT",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,6 +13,7 @@
     "@emotion/server": "^11.10.0",
     "@emotion/styled": "^11.10.8",
     "@mui/icons-material": "^5.11.16",
+    "@mui/lab": "^5.0.0-alpha.128",
     "@mui/material": "^5.12.2",
     "@types/node": "18.16.2",
     "@types/react": "18.2.0",
