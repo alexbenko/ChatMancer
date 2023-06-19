@@ -8,7 +8,7 @@ https://github.com/alexbenko/AskGPT/assets/37863173/27af3a2a-9b7d-46fa-bd6c-8a74
 
 
 ## Description
-AskGPT is an innovative project that facilitates the uploading of a PDF document, allowing users to engage with GPT to pose questions about the content. Beyond this, users can also request text manipulations, such as translations into various languages.
+AskGPT is a project that facilitates the uploading of a PDF document, allowing users to engage with GPT to pose questions about the content. Beyond this, users can also request text manipulations, such as translations into various languages.
 
 This application is currently a proof of concept and is not intended for production use. Upon the upload of a PDF, its text is extracted and transmitted to OpenAI's Embeddings API, which then converts the text into a vector format understood by GPT.
 
