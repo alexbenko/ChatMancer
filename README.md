@@ -7,8 +7,6 @@ This application is currently a proof of concept and is not intended for product
 
 To transition this project to a production-ready state, a vector database would need to be implemented. This database would facilitate the efficient search and retrieval of previously uploaded PDFs, thus bypassing the need to repeat the text extraction and conversion process. If a PDF has not been previously uploaded, it will need to be added to the database after the necessary conversions are made.
 
-## Before Setting Up
-
 ## Base Prompt
 In order for the answers GPT gives to make sense, and perform text modifications, every question prompt is prepended with this:
 ```
