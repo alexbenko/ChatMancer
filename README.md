@@ -1,1 +1,1 @@
-# athena-py
+# AskGPT
