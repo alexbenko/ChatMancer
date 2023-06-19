@@ -40,7 +40,7 @@ Follow the instructions below to set up the project on your local machine for de
     npm install
     npm run build
     ```
-    Wait for the build process to complete.
+    Wait for the build process to complete. The front end is only meant to be exported. I did not feel like setting up Typescript and React.
 
 4. Ensure you have an API key from OpenAI.
 
