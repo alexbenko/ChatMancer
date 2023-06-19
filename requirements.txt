@@ -3,6 +3,5 @@
  openai
  faiss-cpu
  flask
- gunicorn
  tiktoken
-pypdf
+ pypdf

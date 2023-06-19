@@ -46,7 +46,7 @@ def run_pdf_based_qa(question):
         length_function = len,
     )
     # Initialize embeddings object
-    embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get('OPEN_AI_KEY', None))
+    embeddings = OpenAIEmbeddings()
 
     # Load QA chain
     chain = load_qa_chain(ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.7), chain_type="stuff")
@@ -55,7 +55,6 @@ def run_pdf_based_qa(question):
     pdf_directory = "data"
     pdf_files = get_pdf_files(pdf_directory)
     docs = load_pdf_content(pdf_files, pdf_directory)
-
     # Split the documents and create a FAISS index
     documents = text_splitter.split_documents(docs)
     docsearch = create_faiss_index(documents, embeddings)
@@ -67,5 +66,4 @@ def run_pdf_based_qa(question):
     # Search for relevant documents and run the QA chain
     input_documents = docsearch.similarity_search(query)
     message = chain.run(input_documents=input_documents, question=query)
-
     return message

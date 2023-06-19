@@ -53,6 +53,7 @@ export default function Home() {
 
   const onFileChange = (e:any) => {
     if (e.target.files) {
+        console.log(e.target.files)
         setPdfFiles(Array.from(e.target.files));
     }
   };
@@ -64,7 +65,7 @@ export default function Home() {
           <h1 style={{'paddingBottom': '1rem'}}>Ask GPT questions on your PDF files.</h1>
           <div className={styles.card}>
             <form onSubmit={onFormSubmit} className={styles.textareaWrapper}>
-              <FileInput label="Select a PDF" onChange={onFileChange} acceptedFileTypes=".pdf" />
+              <FileInput fileName={pdfFiles[0]?.name ? pdfFiles[0].name : undefined} label="Select a PDF" onChange={onFileChange} acceptedFileTypes=".pdf" />
 
               <br />
               <br />

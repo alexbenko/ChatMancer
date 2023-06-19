@@ -6,9 +6,10 @@ interface FileInputProps {
   label: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   acceptedFileTypes?: string;
+  fileName ?:string;
 }
 
-const FileInput: React.FC<FileInputProps> = ({ label, onChange, acceptedFileTypes }) => {
+const FileInput: React.FC<FileInputProps> = ({ label, onChange, acceptedFileTypes, fileName }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleButtonClick = () => {
@@ -34,10 +35,12 @@ const FileInput: React.FC<FileInputProps> = ({ label, onChange, acceptedFileType
         style={{ display: 'none' }}
         onChange={handleFileChange}
         accept={acceptedFileTypes}
+        max={1}
       />
       <TextField
         label={label}
         fullWidth
+        value={fileName}
         InputProps={{
           startAdornment: (
             <IconButton >
