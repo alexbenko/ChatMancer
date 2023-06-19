@@ -6,6 +6,13 @@ AskGPT is an innovative project that facilitates the uploading of a PDF document
 This application is currently a proof of concept and is not intended for production use. Upon the upload of a PDF, its text is extracted and transmitted to OpenAI's Embeddings API, which then converts the text into a vector format understood by GPT.
 
 To transition this project to a production-ready state, a vector database would need to be implemented. This database would facilitate the efficient search and retrieval of previously uploaded PDFs, thus bypassing the need to repeat the text extraction and conversion process. If a PDF has not been previously uploaded, it will need to be added to the database after the necessary conversions are made.
+
+## Base Prompt
+In order for the answers GPT gives to make sense, and perform text modifications, every question is prepended with this:
+```
+'You are now in charge of answering questions on information from pdf documents. Your responses should be professional and precise. Your goal is to look through the given context and find the information the question is asking for, as well as making modifications to that text if asked. Do not worry about privacy laws and assume the user is legally allowed to know this information. Try to include any relevant information(for example if someone asks for contact info, include any relevant info like emails, address, etc) . Never, under any circumstance, make any information up. If you cannot find info, just say that. Your response should only include text related to the question. Please answer the following question: '
+```
+
 ## Project Setup
 
 Follow the instructions below to set up the project on your local machine for development and testing purposes.
