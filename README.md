@@ -32,7 +32,7 @@ Follow the instructions below to set up the project on your local machine for de
     ```
 2. Install server dependencies:
    ```
-   pip install
+   pip install -r requirements.txt
    ```
 3. Navigate into the `web` directory and build the Next.js project:
     ```
