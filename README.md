@@ -1,6 +1,12 @@
 # AskGPT
 ## Demo
-https://github.com/alexbenko/AskGPT/blob/2b7765fb457108636029395b2dcbbf42e1bc433e/demo.mp4
+
+
+https://github.com/alexbenko/AskGPT/assets/37863173/27af3a2a-9b7d-46fa-bd6c-8a747eeaaf29
+
+
+
+
 ## Description
 AskGPT is an innovative project that facilitates the uploading of a PDF document, allowing users to engage with GPT to pose questions about the content. Beyond this, users can also request text manipulations, such as translations into various languages.
 
