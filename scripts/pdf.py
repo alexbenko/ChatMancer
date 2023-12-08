@@ -64,6 +64,6 @@ def run_pdf_based_qa(question):
 
     query = base_prompt + question
     # Search for relevant documents and run the QA chain
-    input_documents = docsearch.similarity_search(query)
+    input_documents = docsearch.similarity_search(question)
     message = chain.run(input_documents=input_documents, question=query)
     return message
