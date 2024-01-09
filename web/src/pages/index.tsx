@@ -29,7 +29,7 @@ function Index(){
         formData.append('question', question);
 
         try {
-          const response = await fetch('/upload_pdfs', {
+          const response = await fetch('/api/upload_pdfs', {
             method: 'POST',
             body: formData,
           });

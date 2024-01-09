@@ -3,5 +3,6 @@
  openai
  faiss-cpu
  flask
+ flask_restful
  tiktoken
  pypdf
