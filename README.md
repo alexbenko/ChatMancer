@@ -44,19 +44,9 @@ Follow the instructions below to set up the project on your local machine for de
    ```
    pip install -r requirements.txt
    ```
-3. Navigate into the `web` directory and build the Next.js project:
+3. Ensure you have an API key from OpenAI.
 
-   ```
-   cd web
-   npm install
-   npm run build
-   ```
-
-   Wait for the build process to complete. The front end is only meant to be exported. I did not feel like setting up Typescript and React.
-
-4. Ensure you have an API key from OpenAI.
-
-5. Set up the required environment variable with your OpenAI API key:
+4. Set up the required environment variable with your OpenAI API key:
 
    ```
    export OPENAI_API_KEY=your_openai_key
@@ -64,16 +54,25 @@ Follow the instructions below to set up the project on your local machine for de
 
    Replace `your_openai_key` with your actual OpenAI key.
 
-6. Go back to the root directory and run the Python application:
+5. Navigate to the `api` directory and start the Python backend application:
 
    ```
-   cd ..
    python app.py
    ```
 
-   Navigate to the printed URL.
+   This will launch the backend server.
 
-7. Now you're ready to use the application. Upload a small PDF file and ask a question.
+6. Navigate into the `web` directory and install dependencies, then build the Vite.js project:
+
+   ```
+   cd web
+   npm install
+   npm run dev
+   ```
+
+7. You can access the application by navigating to the printed URL.
+
+8. Now you're ready to use the application. Upload a small PDF file and ask a question.
 
 ## Built With
 
