@@ -10,6 +10,7 @@ const useNotification = () => {
       variant: 'info'
     });
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const action = (key:any) =>{
       return (
         <>

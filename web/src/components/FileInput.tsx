@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Box, Button, IconButton, TextField } from '@mui/material';
+import { Box, IconButton, TextField } from '@mui/material';
 import { AttachFile } from '@mui/icons-material';
 
 interface FileInputProps {
@@ -38,6 +38,7 @@ const FileInput: React.FC<FileInputProps> = ({ label, onChange, acceptedFileType
         max={1}
       />
       <TextField
+        style={{'cursor': 'pointer'}}
         label={label}
         fullWidth
         value={fileName}
