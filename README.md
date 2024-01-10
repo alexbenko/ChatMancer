@@ -76,7 +76,8 @@ Follow the instructions below to set up the project on your local machine for de
 
 ## Built With
 
-- [Vite](https://vitejs.dev/) - A lightweight and fast build tool for modern JavaScript applications, designed for quick development and efficient production builds
+- [Vite](https://vitejs.dev/) - A lightweight and fast build tool for modern JavaScript applications, designed for quick development and efficient production builds.
+- [React](https://react.dev/) - A JavaScript library for building user interfaces, developed and maintained by Facebook.
 - [TypeScript](https://www.typescriptlang.org/) - A statically typed superset of JavaScript
 - [Python 3.11](https://www.python.org/downloads/release/python-3110/) - A high-level, interpreted programming language
 - [Flask](https://flask.palletsprojects.com/) - A micro web framework written in Python
