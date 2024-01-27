@@ -12,15 +12,11 @@ from langchain.prompts import (
 )
 from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
 import os
-from resources.chatbot import chat_message_history_to_dict
-import json
-# Define a model for request body
+from scripts.chatbot import chat_message_history_to_dict
+
 class ChatIn(BaseModel):
     question: str
 
-# Define a model for response
-class ChatOut(BaseModel):
-    response: str
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')

@@ -88,7 +88,6 @@ export function Chatbot(){
             body: JSON.stringify({ question: trimmedInput }),
           });
           const data = await response.json();
-                    // Sending POST request to the server
 
           if (data && data.response) {
             console.log(data.response)

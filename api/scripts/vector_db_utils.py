@@ -103,6 +103,3 @@ def query_pinecone(query: str, model_name='gpt-3.5-turbo', temperature=0.7):
     print(results['matches'])
 
     return results['matches']
-
-if __name__ == '__main__':
-    query_pinecone('Which case has the Practice Specialty "Neuro-oncology"')
