@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Avatar, Box, Button, Paper, TextField, Typography } from '@mui/material';
+import { Avatar, Box, Button, Container, Paper, TextField, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -106,8 +106,8 @@ export function Chatbot(){
     }
     };
   return (
-    <Box sx={{width: '80%'}}>
-        <Paper elevation={3} sx={{ padding: '20px', maxHeight: '500px', overflowY: 'auto' }}>
+    <Container maxWidth='xl' sx={{width: '80vw', height: '90vh'}}>
+        <Paper  elevation={3} sx={{ padding: '20px', maxHeight: '80vh', overflowY: 'auto' }}>
             {messages.map((message, index) => (
               <ChatMessage key={index} message={message} />
             ))}
@@ -120,23 +120,20 @@ export function Chatbot(){
         </Paper>
         <Box sx={{ display: 'flex', marginTop: '10px', gap: '10px' }}>
             <TextField
+              disabled={loading}
               fullWidth
               label="Type your message"
               variant="outlined"
               value={inputValue}
               onChange={handleInputChange}
-              onKeyPress={(event) => {
-                if (event.key === 'Enter') {
-                  handleSendMessage();
-                }
-              }}
+
             />
-            <Button disabled={!inputValue} variant="contained" color="primary" onClick={handleSendMessage}>
+            <Button disabled={!inputValue || loading} variant="contained" color="primary" onClick={handleSendMessage}>
                 <SendIcon />
 
             </Button>
         </Box>
-    </Box>
+    </Container>
 
   );
 }
