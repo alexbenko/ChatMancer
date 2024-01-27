@@ -81,6 +81,8 @@ Follow the instructions below to set up the project on your local machine for de
 - [TypeScript](https://www.typescriptlang.org/) - A statically typed superset of JavaScript
 - [Python 3.11](https://www.python.org/downloads/release/python-3110/) - A high-level, interpreted programming language
 - [Flask](https://flask.palletsprojects.com/) - A micro web framework written in Python
+- [NPM](https://www.npmjs.com/) - A package manager for JavaScript, widely used to manage dependencies in Javascript projects and to share and install open-source JavaScript packages.
+- [PIP](https://pypi.org/project/pip/) - A package manager for Python that simplifies the installation and management of software packages from the Python Package Index (PyPI).
 
 ## Contributing
 

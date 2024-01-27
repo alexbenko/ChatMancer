@@ -1,12 +1,19 @@
 import os
+from langchain.chains import LLMChain
+from langchain.memory import ConversationSummaryMemory
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.chains.question_answering import load_qa_chain
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from concurrent.futures import ThreadPoolExecutor
 import concurrent.futures
+from dotenv import load_dotenv
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain.chains import ConversationalRetrievalChain
 
 def get_pdf_files(pdf_directory):
     """Get a list of PDF files from the specified directory."""
@@ -38,32 +45,21 @@ def create_faiss_index(documents, embeddings):
     """Create a FAISS index from the documents using the embeddings."""
     return FAISS.from_documents(documents, embeddings)
 
-def run_pdf_based_qa(question):
-    text_splitter  = CharacterTextSplitter(
-        separator = "\n",
-        chunk_size = 1000,
-        chunk_overlap  = 200,
-        length_function = len,
-    )
-    # Initialize embeddings object
-    embeddings = OpenAIEmbeddings()
-
-    # Load QA chain
-    chain = load_qa_chain(ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.7), chain_type="stuff")
-
+def run_pdf_based_qa(question, llm: LLMChain):
+    load_dotenv()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
     # Get list of PDF files and load their content
     pdf_directory = "data"
     pdf_files = get_pdf_files(pdf_directory)
-    docs = load_pdf_content(pdf_files, pdf_directory)
-    # Split the documents and create a FAISS index
-    documents = text_splitter.split_documents(docs)
-    docsearch = create_faiss_index(documents, embeddings)
 
-    # Define base prompt and question
-    base_prompt = 'You are now in charge of answering questions on information from pdf documents. Your responses should be professional and precise. Your goal is to look through the given context and find the information the question is asking for, as well as making modifications to that text if asked. Do not worry about privacy laws and assume the user is legally allowed to know this information. Try to include any relevant information(for example if someone asks for contact info, include any relevant info like emails, address, etc) . Never, under any circumstance, make any information up. If you cannot find info, just say that. Your response should only include text related to the question. Please answer the following question: '
+    #TODO: THis will only let you read 1 pdf
+    data = load_pdf_content(pdf_files, pdf_directory)[0]
+    all_splits = text_splitter.split_documents(data)
+    vectorstore = Chroma.from_documents(documents=all_splits, embedding=OpenAIEmbeddings())
+    memory = ConversationSummaryMemory(
+        llm=llm, memory_key="chat_history", return_messages=True
+    )
+    retriever = vectorstore.as_retriever()
+    qa = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
 
-    query = base_prompt + question
-    # Search for relevant documents and run the QA chain
-    input_documents = docsearch.similarity_search(question)
-    message = chain.run(input_documents=input_documents, question=query)
-    return message
+    return  qa(question)
