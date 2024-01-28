@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Avatar, Box, Button, Container, Paper, TextField, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -34,8 +34,16 @@ export function Chatbot(){
       fetchChatHistory();
     }, []);
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setInputValue(event.target.value);
+    //const [isImageCommand, setIsImageCommand] = useState(false);
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        //if (value.startsWith('/image')) {
+        //    setIsImageCommand(true);
+        //} else {
+        //    setIsImageCommand(false);
+        //}
+        setInputValue(value);
     };
 
     const handleSendMessage = async () => {
@@ -73,8 +81,8 @@ export function Chatbot(){
       }
   };
   return (
-    <Container maxWidth='xl' component='div' sx={{height: '90vh', minHeight: '100vh', pl: '0', pr: '0'}}>
-        <Paper elevation={3} sx={{ padding: '20px', maxHeight: '90vh', overflowY: 'auto',minHeight: '85vh' }}>
+    <Container maxWidth='xl' component='div' sx={{ pl: '0', pr: '0', pb: 0, height: '100vh'}}>
+        <Paper elevation={3} sx={{ overflowY: 'auto', pb: 0 }}>
             {messages.map((message, index) => (
               <>
                 <ChatMessage key={index} message={message} />
@@ -94,8 +102,8 @@ export function Chatbot(){
               label="Type your message"
               variant="outlined"
               value={inputValue}
-              onChange={handleInputChange}
 
+              onChange={handleInputChange}
             />
             <Button disabled={!inputValue || loading} variant="contained" color="primary" onClick={handleSendMessage}>
                 <SendIcon />
