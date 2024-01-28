@@ -81,8 +81,8 @@ export function Chatbot(){
       }
   };
   return (
-    <Container maxWidth='xl' component='div' sx={{ pl: '0', pr: '0', pb: 0, height: '100vh'}}>
-        <Paper elevation={3} sx={{ overflowY: 'auto', pb: 0 }}>
+    <Container maxWidth='xl' component='div' sx={{height: '90vh', minHeight: '100vh', pl: '0', pr: '0'}}>
+        <Paper elevation={3} sx={{ padding: '20px', maxHeight: '90vh', overflowY: 'auto',minHeight: '85vh' }}>
             {messages.map((message, index) => (
               <>
                 <ChatMessage key={index} message={message} />
