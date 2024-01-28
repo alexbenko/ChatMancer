@@ -2,7 +2,7 @@
 
 ## Demo
 
-https://github.com/alexbenko/AskGPT/assets/37863173/27af3a2a-9b7d-46fa-bd6c-8a747eeaaf29
+[https://github.com/alexbenko/AskGPT/assets/37863173/27af3a2a-9b7d-46fa-bd6c-8a747eeaaf29](https://github.com/alexbenko/AskGPT/blob/841c8b53ef828f1b0a704e079058d35d0c698116/demo.mp4)
 
 ## Description
 
