@@ -12,11 +12,106 @@ export interface ChatMessageProps {
   message: ChatMessage
 }
 
+const isProduction = import.meta.env.MODE === 'production'
+const apiRootPath = isProduction ? '' : '/api';
+
+export function Chatbot(){
+
+
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [inputValue, setInputValue] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const fetchChatHistory = async () => {
+        try {
+          const response = await fetch(`${apiRootPath}/chat`);
+          const data = await response.json();
+          console.log(data)
+          setMessages(data.response.messages);
+        } catch (error) {
+          console.error('Error fetching chat history:', error);
+        }
+      };
+      fetchChatHistory();
+    }, []);
+
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setInputValue(event.target.value);
+    };
+
+    const handleSendMessage = async () => {
+      const trimmedInput = inputValue.trim();
+      if (trimmedInput) {
+        try {
+          setMessages([...messages, {
+            type: "human",
+            content: trimmedInput,
+          }]);
+          setLoading(true)
+          const response = await fetch(`${apiRootPath}/chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ question: trimmedInput }),
+          });
+          const data = await response.json();
+
+          if (data && data.response) {
+            console.log(data.response)
+            setLoading(false)
+            setMessages((prevMessages) => [...prevMessages, {
+              type: "ai",
+              content: data.response,
+            }]);
+          }
+        } catch (error) {
+          console.error('Error sending message:', error);
+        } finally{
+            setInputValue(''); // Clear the input field after sending the message
+        }
+      }
+    };
+  return (
+    <Container maxWidth='xl' component='div' sx={{height: '90vh', minHeight: '100vh'}}>
+        <Paper elevation={3} sx={{ padding: '20px', maxHeight: '90vh', overflowY: 'auto',minHeight: '85vh' }}>
+            {messages.map((message, index) => (
+              <ChatMessage key={index} message={message} />
+            ))}
+            {loading &&
+                <Box sx={{ display: 'flex' }}>
+                    <CircularProgress />
+                </Box>
+            }
+            {loading && <Typography variant="body1">Loading AskGpt Response...</Typography>}
+        </Paper>
+        <Box sx={{ display: 'flex', marginTop: '10px', gap: '10px' }}>
+            <TextField
+              disabled={loading}
+              fullWidth
+              label="Type your message"
+              variant="outlined"
+              value={inputValue}
+              onChange={handleInputChange}
+
+            />
+            <Button disabled={!inputValue || loading} variant="contained" color="primary" onClick={handleSendMessage}>
+                <SendIcon />
+
+            </Button>
+        </Box>
+    </Container>
+
+  );
+}
+
+export default Chatbot;
 
 const ChatMessage = ({ message }: ChatMessageProps)=> {
     const isAIMessage = message.type === 'ai';
-    const senderName = isAIMessage ? 'MedaMate' : 'You';
-    const avatarSrc = isAIMessage ? '/ai.webp' : '/me.png';
+    const senderName = isAIMessage ? 'AskGpt' : 'You';
+    const avatarSrc = isAIMessage ? `/ai.webp` : `cat.webp`;
 
     return (
       <Box
@@ -47,94 +142,3 @@ const ChatMessage = ({ message }: ChatMessageProps)=> {
       </Box>
     );
 };
-
-export function Chatbot(){
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [inputValue, setInputValue] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-      const fetchChatHistory = async () => {
-        try {
-          const response = await fetch('/api/chat');
-          const data = await response.json();
-          console.log(data)
-          setMessages(data.response.messages);
-        } catch (error) {
-          console.error('Error fetching chat history:', error);
-        }
-      };
-      fetchChatHistory();
-    }, []);
-
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setInputValue(event.target.value);
-    };
-
-    const handleSendMessage = async () => {
-      const trimmedInput = inputValue.trim();
-      if (trimmedInput) {
-        try {
-          setMessages([...messages, {
-            type: "human",
-            content: trimmedInput,
-          }]);
-          setLoading(true)
-          const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ question: trimmedInput }),
-          });
-          const data = await response.json();
-
-          if (data && data.response) {
-            console.log(data.response)
-            setLoading(false)
-            setMessages((prevMessages) => [...prevMessages, {
-              type: "ai",
-              content: data.response,
-            }]);
-          }
-        } catch (error) {
-          console.error('Error sending message:', error);
-        } finally{
-            setInputValue(''); // Clear the input field after sending the message
-        }
-    }
-    };
-  return (
-    <Container maxWidth='xl' sx={{width: '80vw', height: '90vh'}}>
-        <Paper  elevation={3} sx={{ padding: '20px', maxHeight: '80vh', overflowY: 'auto' }}>
-            {messages.map((message, index) => (
-              <ChatMessage key={index} message={message} />
-            ))}
-            {loading &&
-                <Box sx={{ display: 'flex' }}>
-                    <CircularProgress />
-                </Box>
-            }
-            {loading && <Typography variant="body1">Loading MedaMate Response...</Typography>}
-        </Paper>
-        <Box sx={{ display: 'flex', marginTop: '10px', gap: '10px' }}>
-            <TextField
-              disabled={loading}
-              fullWidth
-              label="Type your message"
-              variant="outlined"
-              value={inputValue}
-              onChange={handleInputChange}
-
-            />
-            <Button disabled={!inputValue || loading} variant="contained" color="primary" onClick={handleSendMessage}>
-                <SendIcon />
-
-            </Button>
-        </Box>
-    </Container>
-
-  );
-}
-
-export default Chatbot;

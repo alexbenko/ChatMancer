@@ -1,6 +1,0 @@
-export DATASTORE=pinecone
-export BEARER_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsZXggYmVua28iLCJpYXQiOjE1MTYyMzkwMjJ9.2IrnpiPEodjEVvqqf332LTKs5KX5mWyEboSnsMON5dg
-export OPENAI_API_KEY=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
-export PINECONE_API_KEY=9d4a7dfd-b074-446a-bf28-1aaf67ef90e9
-
-export PINECONE_INDEX=askgpt

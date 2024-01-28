@@ -4,6 +4,7 @@ import { useMediaQuery, createTheme, ThemeProvider, CssBaseline } from '@mui/mat
 import { SnackbarOrigin, SnackbarProvider } from 'notistack'
 import useIsMobile from './hooks/useIsMobile'
 import Index from './pages'
+import PasswordProtected from './components/PasswordProtected'
 
 function App() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -26,7 +27,9 @@ function App() {
     <ThemeProvider theme={theme}>
       <SnackbarProvider maxSnack={3} anchorOrigin={snackConfig}>
         <CssBaseline />
-        <Index />
+          <PasswordProtected>
+            <Index />
+          </PasswordProtected>
       </SnackbarProvider>
     </ThemeProvider>
   )
