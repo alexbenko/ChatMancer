@@ -44,8 +44,6 @@ This is your OpenAI API key, used to authenticate requests to OpenAI services su
 
 This variable acts as a simple security measure to protect access to your project, especially when deployed on the internet. You can set this to any string value you prefer. This password should be kept confidential and only shared with authorized users.
 
-### `ENVIORNMENT`
-
 ## Project Setup With Docker
 
 If you just want to play with this locally and know how to use docker follow these steps.
