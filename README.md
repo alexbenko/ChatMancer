@@ -34,7 +34,7 @@ While this is relatively low, costs can vary based on usage, so it's important t
 
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your `.env` file. These variables are crucial for securing the application and connecting to external services.
+To run this project, you will need to add the following environment variables to your `.env` file in the /api directory. These variables are crucial for securing the application and connecting to external services.
 
 ### `OPENAI_API_KEY`
 
@@ -44,7 +44,34 @@ This is your OpenAI API key, used to authenticate requests to OpenAI services su
 
 This variable acts as a simple security measure to protect access to your project, especially when deployed on the internet. You can set this to any string value you prefer. This password should be kept confidential and only shared with authorized users.
 
-## Project Setup
+### `ENVIORNMENT`
+
+## Project Setup With Docker
+
+If you just want to play with this locally and know how to use docker follow these steps.
+
+1. Clone the repository:
+
+   ```
+   git clone https://github.com/alexbenko/AskGPT.git
+   ```
+
+   ```
+   cd AskGPT
+   ```
+
+2. Create and fill required values in .env file in /api
+3. Run command at root
+   ```
+   docker build -t askgpt .
+   ```
+4. Start docker
+   ```
+   docker run -p 8000:8000 askgpt
+   ```
+5. Click on the printed url, enter your password, and start chatting!
+
+## Project Setup Without Docker
 
 Follow the instructions below to set up the project on your local machine for development and testing purposes.
 
@@ -90,8 +117,6 @@ Follow the instructions below to set up the project on your local machine for de
    ```
 
 7. You can access the application by navigating to the printed URL.
-
-8. Now you're ready to use the application. Upload a small PDF file and ask a question.
 
 ## Built With
 
