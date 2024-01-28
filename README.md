@@ -2,7 +2,10 @@
 
 ## Demo
 
-[https://github.com/alexbenko/AskGPT/assets/37863173/27af3a2a-9b7d-46fa-bd6c-8a747eeaaf29](https://github.com/alexbenko/AskGPT/blob/841c8b53ef828f1b0a704e079058d35d0c698116/demo.mp4)
+
+https://github.com/alexbenko/AskGPT/assets/37863173/d4b3dff5-e4cc-40fa-b94e-7e422c63ef57
+
+
 
 ## Description
 
@@ -16,7 +19,7 @@ AskGPT is adept at remembering the context from previous user interactions, enab
 
 ### Image Generation Capability
 
-A distinctive feature of AskGPT is the integration of the `/image` command. Users can prompt the creation of images by entering `/image` followed by a descriptive brief. The application seamlessly processes this command, connecting with an image generation API to produce visual content that aligns with the user's description. This innovative functionality adds a creative dimension to the interaction, enriching the overall experience.
+A distinctive feature of AskGPT is the integration of the `/image` command. Users can prompt the creation of images by entering `/image` followed by a descriptive brief. The application seamlessly processes this command, connecting with an image generation API (currently uses DALL·E) to produce visual content that aligns with the user's description. This innovative functionality adds a creative dimension to the interaction, enriching the overall experience.
 
 ### Multilingual Support
 
