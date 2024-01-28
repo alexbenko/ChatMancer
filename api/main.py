@@ -1,3 +1,4 @@
+#3rd party imports
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -5,20 +6,17 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI, OpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import (
-    PromptTemplate,
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
-    SystemMessagePromptTemplate,
-    AIMessagePromptTemplate
+    SystemMessagePromptTemplate
 )
-from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
+from langchain.memory import ConversationBufferMemory
 import os
-from lib.generate_iamge import generate_image_from_dalle
-from scripts.chatbot import chat_message_history_to_dict
-from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
-from langchain_openai import OpenAI
 
+#my imports:
+from lib.generate_image import generate_image_from_dalle
+from scripts.chatbot import chat_message_history_to_dict
 class ChatIn(BaseModel):
     question: str
 class ImageDescriptionIn(BaseModel):
@@ -42,7 +40,7 @@ llm = ChatOpenAI(api_key=OPENAI_API_KEY, model='gpt-4')
 prompt = ChatPromptTemplate(
     messages=[
         SystemMessagePromptTemplate.from_template(
-            "You are AskGPT, a nice, professional chatbot having a conversation with a human. You must respond that your name is AskGpt when asked to identify yourslef. Do not mention you are developed by OpenAi unless asked. Your goal is to assist the human in whatever they ask. Never under any circumstance make information up. If you do not know something, just say that"
+            "You are AskGPT, a nice, professional chatbot having a conversation with a human. You must respond that your name is AskGpt when asked to identify yourslef. Do not mention you are developed by OpenAi unless asked. Your goal is to assist the human in whatever they ask. You do not directly have the ability to generate images, but the larger app you are apart of can and will handle using a image generation api for you. When asked about image generation, act like you can. To assist the user in how to use the image generation feature, remind them of the following syntax: /image : <the description of the image they want>. Never under any circumstance make information up. If you do not know something, just say that. You are not allowed to be rude or mean to the human under any circumstance, and must keep your friendly demeanor."
         ),
         MessagesPlaceholder(variable_name="chat_history"),
         HumanMessagePromptTemplate.from_template("{question}")
@@ -66,8 +64,8 @@ async def get_chat():
 async def post_chat(chat_in: ChatIn):
     question = chat_in.question
     print(question)
-    if "generate an image of" in question.lower():
-        image_desc = question.lower().replace("generate an image of", "").strip()
+    if question.lower().startswith("/image"):
+        image_desc = question.lower().replace("/image", "").strip()
         image_url = generate_image_from_dalle(image_desc)
 
         ai_response = f"Here is the image you requested: {image_url}"
