@@ -16,8 +16,6 @@ const isProduction = import.meta.env.MODE === 'production'
 const apiRootPath = isProduction ? '' : '/api';
 
 export function Chatbot(){
-
-
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [loading, setLoading] = useState(false);
@@ -60,7 +58,7 @@ export function Chatbot(){
 
           if (data && data.response) {
             console.log(data.response)
-            setLoading(false)
+
             setMessages((prevMessages) => [...prevMessages, {
               type: "ai",
               content: data.response,
@@ -69,15 +67,18 @@ export function Chatbot(){
         } catch (error) {
           console.error('Error sending message:', error);
         } finally{
+            setLoading(false)
             setInputValue(''); // Clear the input field after sending the message
         }
       }
-    };
+  };
   return (
-    <Container maxWidth='xl' component='div' sx={{height: '90vh', minHeight: '100vh'}}>
+    <Container maxWidth='xl' component='div' sx={{height: '90vh', minHeight: '100vh', pl: '0', pr: '0'}}>
         <Paper elevation={3} sx={{ padding: '20px', maxHeight: '90vh', overflowY: 'auto',minHeight: '85vh' }}>
             {messages.map((message, index) => (
-              <ChatMessage key={index} message={message} />
+              <>
+                <ChatMessage key={index} message={message} />
+              </>
             ))}
             {loading &&
                 <Box sx={{ display: 'flex' }}>
@@ -127,7 +128,17 @@ const ChatMessage = ({ message }: ChatMessageProps)=> {
             padding: '10px',
         }}
       >
-        <Typography variant="body1" gutterBottom>{message.content}</Typography>
+        {message.content.startsWith('Here is the image you requested:') ? (
+          <>
+              <Typography variant="body1" gutterBottom>Here is the image you requested:</Typography>
+              <a href={message.content.replace('Here is the image you requested: ', '')} target="_blank" rel="noopener noreferrer">
+                <Avatar   sx={{ width: 100, height: 100 }} src={message.content.replace('Here is the image you requested: ', '')} alt="Generated" />
+              </a>
+
+          </>
+        ) : (
+          <Typography variant="body1" gutterBottom>{message.content}</Typography>
+        )}
         <Avatar alt={senderName} src={avatarSrc} />
         <Typography
           variant="subtitle2"

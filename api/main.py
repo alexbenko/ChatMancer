@@ -2,20 +2,27 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import (
+    PromptTemplate,
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
     SystemMessagePromptTemplate,
+    AIMessagePromptTemplate
 )
 from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
 import os
+from lib.generate_iamge import generate_image_from_dalle
 from scripts.chatbot import chat_message_history_to_dict
+from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
+from langchain_openai import OpenAI
 
 class ChatIn(BaseModel):
     question: str
+class ImageDescriptionIn(BaseModel):
+    description: str
 
 
 load_dotenv()
@@ -31,18 +38,20 @@ is_production = ENVIORNMENT == 'production'
 
 #TODO: PUT THIS IN ANOTHER FILE
 print('SETTING UP MODEL....')
-llm = ChatOpenAI(api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(api_key=OPENAI_API_KEY, model='gpt-4')
 prompt = ChatPromptTemplate(
     messages=[
         SystemMessagePromptTemplate.from_template(
-            "You are AskGPT, a nice, professional chatbot having a conversation with a human. Do not mention you are developed by OpenAi unless asked. Your goal is to assist the human in whatever they ask. Never under any circumstance make information up. If you do not know something, just say that"
+            "You are AskGPT, a nice, professional chatbot having a conversation with a human. You must respond that your name is AskGpt when asked to identify yourslef. Do not mention you are developed by OpenAi unless asked. Your goal is to assist the human in whatever they ask. Never under any circumstance make information up. If you do not know something, just say that"
         ),
         MessagesPlaceholder(variable_name="chat_history"),
-        HumanMessagePromptTemplate.from_template("{question}"),
+        HumanMessagePromptTemplate.from_template("{question}")
     ]
 )
+
 #memory = ConversationSummaryMemory(llm=ChatOpenAI())
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
 conversation = LLMChain(llm=llm, prompt=prompt, memory=memory)
 conversation.invoke({"question": "Hello who are you?"})
 print('DONE SETTING UP !!!')
@@ -55,9 +64,20 @@ async def get_chat():
 
 @app.post("/chat")
 async def post_chat(chat_in: ChatIn):
-    print(chat_in.question)
     question = chat_in.question
-    response = conversation.invoke({"question": question})
+    print(question)
+    if "generate an image of" in question.lower():
+        image_desc = question.lower().replace("generate an image of", "").strip()
+        image_url = generate_image_from_dalle(image_desc)
+
+        ai_response = f"Here is the image you requested: {image_url}"
+        conversation.memory.chat_memory.add_user_message(question)
+        conversation.memory.chat_memory.add_ai_message(ai_response)
+
+        response = {"text": ai_response}
+    else:
+        response = conversation.invoke({"question": question})
+
     return {"response": response['text']}
 
 class PasswordIn(BaseModel):
@@ -70,7 +90,7 @@ async def verify_password(password_in: PasswordIn):
     if password_in.password == correct_password:
         return {"message": "Password verified successfully."}
     else:
-        raise HTTPException(status_code=400, detail="Invalid password.")
+        raise HTTPException(status_code=400, detail=":(")
 
 if is_production:
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
