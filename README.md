@@ -2,14 +2,11 @@
 
 ## Demo
 
-
 https://github.com/alexbenko/AskGPT/assets/37863173/d4b3dff5-e4cc-40fa-b94e-7e422c63ef57
-
-
 
 ## Description
 
-AskGPT is an innovative application that leverages the power of a LLM (currently GPT) to offer a dynamic and interactive user experience, inspired by OpenAI's ChatGPT. This application stands out with its ability to maintain context in conversations and generate images based on user requests. And could potentially be a cheaper alternative than ChatGpt plus with the ability to use models only available using the OpenAi API.
+AskGPT is an app that leverages the power of a LLM (currently GPT) to offer a dynamic and interactive user experience, inspired by OpenAI's ChatGPT. This application stands out with its ability to maintain context in conversations and generate images based on user requests. And could potentially be a cheaper alternative than ChatGpt plus with the ability to use models only available using the OpenAi API.
 
 ## Key Features
 
