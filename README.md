@@ -18,10 +18,6 @@ AskGPT is adept at remembering the context from previous user interactions, enab
 
 A distinctive feature of AskGPT is the integration of the `/image` command. Users can prompt the creation of images by entering `/image` followed by a descriptive brief. The application seamlessly processes this command, connecting with an image generation API (currently uses DALL·E) to produce visual content that aligns with the user's description. This innovative functionality adds a creative dimension to the interaction, enriching the overall experience.
 
-### Multilingual Support
-
-The application continues to offer text manipulation options, such as language translations, catering to a diverse global audience.
-
 ## Current State and Future Development
 
 AskGPT, with its advanced conversation memory and image generation features, is a sophisticated tool designed for a wide range of interactive experiences. As the application evolves, I will reintroduce the ability to interact with PDF documents, allowing users to discuss and analyze content within these documents seamlessly.
