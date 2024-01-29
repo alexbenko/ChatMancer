@@ -26,5 +26,4 @@ EXPOSE 8000
 
 ENV ENVIORNMENT production
 
-# Run main.py when the container launches
 CMD ["python", "main.py"]
