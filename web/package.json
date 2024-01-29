@@ -14,7 +14,6 @@
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.3",
-    "@mui/lab": "^5.0.0-alpha.159",
     "@mui/material": "^5.15.3",
     "notistack": "^3.0.1",
     "react": "^18.2.0",
