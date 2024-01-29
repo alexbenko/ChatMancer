@@ -1,4 +1,5 @@
-import { TextField, Button, Typography, Box } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { TextField, Typography, Box } from '@mui/material';
 import { ChangeEvent, FormEvent, ReactNode, useState } from 'react';
 interface PasswordProtectedProps {
   children: ReactNode;
@@ -6,6 +7,7 @@ interface PasswordProtectedProps {
 const isProduction = import.meta.env.MODE === 'production'
 const apiRootPath = isProduction ? '' : '/api';
 function PasswordProtected({ children }: PasswordProtectedProps) {
+  const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,7 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-
+    setLoading(true)
     try {
       const response = await fetch(apiRootPath + '/verify-password', {
         method: 'POST',
@@ -34,6 +36,8 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
       }
     } catch (error) {
       setError('An error occurred while verifying the password.');
+    } finally{
+      setLoading(false)
     }
   };
 
@@ -62,7 +66,7 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
         onChange={handlePasswordChange}
         label="Password"
       />
-      <Button type="submit">Submit</Button>
+      <LoadingButton loading={loading} type="submit">Submit</LoadingButton>
       {error && <Typography color="error">{error}</Typography>}
     </Box>
   );
