@@ -22,6 +22,12 @@ A distinctive feature of AskGPT is the integration of the `/image` command. User
 
 AskGPT, with its advanced conversation memory and image generation features, is a sophisticated tool designed for a wide range of interactive experiences. As the application evolves, I will reintroduce the ability to interact with PDF documents, allowing users to discuss and analyze content within these documents seamlessly.
 
+### Future Planned Features
+
+1. Integration Gpt vision so a user can upload an image and ask gpt questions on it.
+2. Support for a user to give gpt a url to ask questions on / add to the context
+3. Reimplement the ability to upload files to ask questions / add to the context.
+
 ## Usage Costs
 
 Please note that running this application involves usage of certain APIs that are not free of charge. Costs depend on the volume of use. However, for personal use, these APIs are generally quite affordable. For instance, during my personal usage of the app, the highest monthly bill I ever received was only $8. I was using multiple services that month like Dalle and played A LOT with AutoGPT.
