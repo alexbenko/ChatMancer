@@ -1,8 +1,8 @@
-import { LoadingButton } from "@mui/lab";
 import { Container, Box, Typography, TextField } from "@mui/material";
 import Answer from "./Answer";
 import FileInput from "./FileInput";
 import { useState } from "react";
+import { LoadingButton } from "@mui/lab";
 
 export function PdfQa() {
     const [pdfFiles, setPdfFiles] = useState<File[]>([]);

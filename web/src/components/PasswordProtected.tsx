@@ -32,6 +32,7 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
         setIsAuthenticated(true);
       } else {
         const { message } = await response.json();
+        console.error(message)
         setError(message);
       }
     } catch (error) {
