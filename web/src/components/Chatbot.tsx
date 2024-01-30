@@ -112,10 +112,16 @@ export function Chatbot(){
             <TextField
               disabled={loading}
               fullWidth
+              multiline
               label="Type your message"
               variant="outlined"
               value={inputValue}
-
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    handleSendMessage();
+                }
+              }}
               onChange={handleInputChange}
             />
             <LoadingButton loading={loading} disabled={!inputValue || loading} variant="contained" color="primary" onClick={handleSendMessage}>
