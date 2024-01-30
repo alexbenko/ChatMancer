@@ -1,24 +1,13 @@
-#3rd party imports
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI, OpenAI
-from langchain.chains import LLMChain
-from langchain.prompts import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    MessagesPlaceholder,
-    SystemMessagePromptTemplate
-)
-from langchain.memory import ConversationBufferMemory
 import os
 
-
-#my imports:
+from init_askgpt import init_askGpt
 from lib.generate_image import generate_image_from_dalle
-from scripts.chatbot import chat_message_history_to_dict
-from chatbot_prompt import CHATBOT_SYSTEM_PROMPT
+from lib.chatbot import chat_message_history_to_dict
+
 class ChatIn(BaseModel):
     question: str
 class ImageDescriptionIn(BaseModel):
@@ -35,27 +24,9 @@ assert OPENAI_API_KEY is not None
 ENVIORNMENT = os.getenv('ENVIORNMENT', 'development')
 print(ENVIORNMENT)
 is_production = ENVIORNMENT == 'production'
+model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
+conversation = init_askGpt(OPENAI_API_KEY, model=model)
 
-#TODO: PUT THIS IN ANOTHER FILE
-print('SETTING UP MODEL....')
-llm = ChatOpenAI(api_key=OPENAI_API_KEY, model='gpt-4')
-prompt = ChatPromptTemplate(
-    messages=[
-        SystemMessagePromptTemplate.from_template(
-            CHATBOT_SYSTEM_PROMPT
-        ),
-        MessagesPlaceholder(variable_name="chat_history"),
-        HumanMessagePromptTemplate.from_template("{question}")
-    ]
-)
-
-#memory = ConversationSummaryMemory(llm=ChatOpenAI())
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-conversation = LLMChain(llm=llm, prompt=prompt, memory=memory)
-conversation.invoke({"question": "Hello who are you?"})
-conversation.invoke({"question": "Can you generate images?"})
-print('DONE SETTING UP !!!')
 
 app = FastAPI()
 @app.get("/chat")
@@ -66,7 +37,7 @@ async def get_chat():
 @app.post("/chat")
 async def post_chat(chat_in: ChatIn):
     question = chat_in.question
-    print(question)
+
     if question.lower().startswith("/image"):
         image_desc = question.lower().replace("/image", "").strip()
         image_url = generate_image_from_dalle(image_desc)
