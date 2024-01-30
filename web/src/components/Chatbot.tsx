@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Avatar, Box, Button, Container, Paper, TextField, Typography } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
+import { Avatar, Box, Container, Paper, TextField, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import CircularProgress from '@mui/material/CircularProgress';
+import { LoadingButton } from '@mui/lab';
+import ReactMarkdown from 'react-markdown';
 
 export interface ChatMessage{
         type: "human" | "ai";
@@ -80,6 +82,14 @@ export function Chatbot(){
         }
       }
   };
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView();
+    }
+  }, [messages]);
+
+
   return (
     <Container maxWidth='xl' component='div' sx={{height: '90vh', minHeight: '100vh', pl: '0', pr: '0'}}>
         <Paper elevation={3} sx={{ padding: '20px', maxHeight: '90vh', overflowY: 'auto',minHeight: '85vh' }}>
@@ -88,12 +98,15 @@ export function Chatbot(){
                 <ChatMessage key={index} message={message} />
               </>
             ))}
+            <div ref={messagesEndRef} />
+
             {loading &&
                 <Box sx={{ display: 'flex' }}>
                     <CircularProgress />
+                    <Typography variant="body1">Loading AskGpt Response...</Typography>
                 </Box>
             }
-            {loading && <Typography variant="body1">Loading AskGpt Response...</Typography>}
+
         </Paper>
         <Box sx={{ display: 'flex', marginTop: '10px', gap: '10px' }}>
             <TextField
@@ -105,10 +118,10 @@ export function Chatbot(){
 
               onChange={handleInputChange}
             />
-            <Button disabled={!inputValue || loading} variant="contained" color="primary" onClick={handleSendMessage}>
+            <LoadingButton loading={loading} disabled={!inputValue || loading} variant="contained" color="primary" onClick={handleSendMessage}>
                 <SendIcon />
 
-            </Button>
+            </LoadingButton>
         </Box>
     </Container>
 
@@ -145,7 +158,11 @@ const ChatMessage = ({ message }: ChatMessageProps)=> {
 
           </>
         ) : (
-          <Typography variant="body1" gutterBottom>{message.content}</Typography>
+          <Typography component='div' variant="body1" gutterBottom>
+              <ReactMarkdown >
+                {message.content}
+              </ReactMarkdown>
+          </Typography>
         )}
         <Avatar alt={senderName} src={avatarSrc} />
         <Typography
