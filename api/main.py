@@ -44,6 +44,12 @@ async def get_context_file():
 @app.post("/clear_context_file")
 async def reset_context_file():
     global loaded_file
+    if loaded_file is not None:
+        try:
+            os.remove(loaded_file)
+        except:
+            return {"response": "Error deleting file"}
+
     loaded_file = None
     return {"response": "Context file has been reset"}
 
