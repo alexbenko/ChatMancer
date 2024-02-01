@@ -27,5 +27,5 @@ def init_askGpt(api_key,model = 'gpt-3.5-turbo', temperature = 0.7):
     conversation = LLMChain(llm=llm, prompt=prompt, memory=memory)
     conversation.invoke({"question": "Hello who are you?"})
     conversation.invoke({"question": "Can you generate images?"})
-
+    conversation.invoke({"question": "Can you answer questions on a PDF?"})
     return conversation
