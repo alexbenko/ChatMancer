@@ -5,11 +5,11 @@ langchain-community
 fastapi
 uvicorn
 pyPDF2
-#faiss-cpu
 tiktoken
 pypdf
 python-dotenv
 pandas
 tabulate
-
-
+chromadb
+python-multipart
+beautifulsoup4
