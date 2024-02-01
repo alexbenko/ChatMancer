@@ -1,29 +1,17 @@
-#3rd party imports
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from typing import Optional
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI, OpenAI
-from langchain.chains import LLMChain
-from langchain.prompts import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    MessagesPlaceholder,
-    SystemMessagePromptTemplate
-)
-from langchain.memory import ConversationBufferMemory
 import os
 
-
-#my imports:
+from init_askgpt import init_askGpt
 from lib.generate_image import generate_image_from_dalle
-from scripts.chatbot import chat_message_history_to_dict
-from chatbot_prompt import CHATBOT_SYSTEM_PROMPT
+from lib.chatbot import chat_message_history_to_dict
+from lib.retriever import get_pdf_retriever, run_document_q_and_a
+
 class ChatIn(BaseModel):
     question: str
-class ImageDescriptionIn(BaseModel):
-    description: str
-
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -34,40 +22,55 @@ assert OPENAI_API_KEY is not None
 
 ENVIORNMENT = os.getenv('ENVIORNMENT', 'development')
 print(ENVIORNMENT)
+
 is_production = ENVIORNMENT == 'production'
+model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
-#TODO: PUT THIS IN ANOTHER FILE
-print('SETTING UP MODEL....')
-llm = ChatOpenAI(api_key=OPENAI_API_KEY, model='gpt-4')
-prompt = ChatPromptTemplate(
-    messages=[
-        SystemMessagePromptTemplate.from_template(
-            CHATBOT_SYSTEM_PROMPT
-        ),
-        MessagesPlaceholder(variable_name="chat_history"),
-        HumanMessagePromptTemplate.from_template("{question}")
-    ]
-)
-
-#memory = ConversationSummaryMemory(llm=ChatOpenAI())
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-conversation = LLMChain(llm=llm, prompt=prompt, memory=memory)
-conversation.invoke({"question": "Hello who are you?"})
-conversation.invoke({"question": "Can you generate images?"})
-print('DONE SETTING UP !!!')
-
+conversation = init_askGpt(OPENAI_API_KEY, model=model)
 app = FastAPI()
+
 @app.get("/chat")
 async def get_chat():
     chat_history = chat_message_history_to_dict(conversation.memory.dict())
+
     return {"response": chat_history}
 
+loaded_file = None
+@app.get("/context_file")
+async def get_context_file():
+    global loaded_file
+    return {"response": loaded_file}
+
+@app.post("/clear_context_file")
+async def reset_context_file():
+    global loaded_file
+    if loaded_file is not None:
+        try:
+            os.remove(loaded_file)
+        except:
+            return {"response": "Error deleting file"}
+
+    loaded_file = None
+    return {"response": "Context file has been reset"}
+
 @app.post("/chat")
-async def post_chat(chat_in: ChatIn):
-    question = chat_in.question
-    print(question)
-    if question.lower().startswith("/image"):
+async def post_chat(question: str = Form(...), file: Optional[UploadFile] = File(None)):
+    global loaded_file
+    if question.lower().startswith("/pdf") and loaded_file or (file and file.filename.endswith('.pdf')):
+        print('PDF !!!!!')
+        if file:
+            contents = file.file.read()
+
+            with open(file.filename, 'wb') as f:
+                f.write(contents)
+
+            loaded_file = file.filename
+
+        retriever = get_pdf_retriever(OPENAI_API_KEY, file_path=loaded_file)
+        ai_response = run_document_q_and_a(conversation, retriever, question)
+
+        response = {"text": ai_response}
+    elif question.lower().startswith("/image"):
         image_desc = question.lower().replace("/image", "").strip()
         image_url = generate_image_from_dalle(image_desc)
 

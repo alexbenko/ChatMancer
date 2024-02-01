@@ -6,6 +6,16 @@ interface PasswordProtectedProps {
 }
 const isProduction = import.meta.env.MODE === 'production'
 const apiRootPath = isProduction ? '' : '/api';
+
+/**
+ * `PasswordProtected` is a React component that wraps its children with password protection.
+ * It renders a form that asks the user for a password. When the form is submitted, it sends a POST request to the '/verify-password' endpoint with the entered password.
+ * If the server responds with a status of OK, the component sets `isAuthenticated` to true and renders its children.
+ * If the server responds with an error, the component displays the error message.
+ *
+ * @component
+ * @param {ReactNode} children - The children to render when the user is authenticated.
+ */
 function PasswordProtected({ children }: PasswordProtectedProps) {
   const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState<string>('');
