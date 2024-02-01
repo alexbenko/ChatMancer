@@ -1,19 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
     Avatar,
     Box,
+    Chip,
     Container,
     IconButton,
     InputAdornment,
-    LinearProgress,
     Paper,
     TextField,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import CircularProgress from "@mui/material/CircularProgress";
 import { LoadingButton } from "@mui/lab";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import useNotification from "../hooks/useNotification";
 
 export interface ChatMessage {
     type: "human" | "ai";
@@ -31,7 +33,56 @@ export function Chatbot() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState("");
     const [loading, setLoading] = useState(false);
-    const [progress, setProgress] = useState(0);
+    const [error, setError] = useState<string | null>(null);
+    const [info, setInfo] = useState<string | null>(null);
+    const [contextFile, setContextFile] = useState<string | null>(null);
+    const sendNotification = useNotification();
+
+    useEffect(() => {
+        if (error) {
+            sendNotification({ msg: error, variant: "error" });
+        }
+    }, [error, sendNotification]);
+
+    useEffect(() => {
+        if (info) {
+            sendNotification({ msg: info, variant: "info" });
+        }
+    }, [info, sendNotification]);
+
+    const clearContextFile = async () => {
+        try {
+            const response = await fetch(`${apiRootPath}/clear_context_file`, {
+                method: "POST",
+            });
+
+            const data = await response.json();
+            if (data?.response) {
+                setInfo(data.response);
+                setContextFile(null);
+            } else {
+                setError("Error Clearing Context File.");
+            }
+        } catch (error) {
+            console.error("Error clearing context file:", error);
+            setError("An error occurred while clearing context file.");
+        }
+    };
+
+    const fetchContextFile = async () => {
+        try {
+            const response = await fetch(`${apiRootPath}/context_file`);
+            const data = await response.json();
+            console.log(data);
+            if (data?.response) {
+                setContextFile(data.response);
+                if (file) setFile(null);
+            }
+        } catch (error) {
+            console.error("Error fetching context file:", error);
+            setError("An error occurred while fetching context file.");
+        }
+    };
 
     useEffect(() => {
         const fetchChatHistory = async () => {
@@ -42,20 +93,20 @@ export function Chatbot() {
                 setMessages(data.response.messages);
             } catch (error) {
                 console.error("Error fetching chat history:", error);
+                setError("An error occurred while fetching chat history.");
             }
         };
+
         fetchChatHistory();
+        fetchContextFile();
     }, []);
 
-    //const [isImageCommand, setIsImageCommand] = useState(false);
+    useEffect(() => {
+        fetchContextFile();
+    }, [messages]);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
-        //if (value.startsWith('/image')) {
-        //    setIsImageCommand(true);
-        //} else {
-        //    setIsImageCommand(false);
-        //}
         setInputValue(value);
     };
 
@@ -71,13 +122,18 @@ export function Chatbot() {
                     },
                 ]);
                 setLoading(true);
-                const response = await fetch(`${apiRootPath}/chat`, {
+
+                const formData = new FormData();
+                formData.append("question", trimmedInput);
+                if (file) {
+                    formData.append("file", file);
+                }
+                const requestOptions = {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ question: trimmedInput }),
-                });
+                    body: formData, // FormData will set the Content-Type to 'multipart/form-data' automatically
+                };
+
+                const response = await fetch(`${apiRootPath}/chat`, requestOptions);
                 const data = await response.json();
 
                 if (data && data.response) {
@@ -90,15 +146,18 @@ export function Chatbot() {
                             content: data.response,
                         },
                     ]);
+                    if (file) setFile(null);
                 }
             } catch (error) {
                 console.error("Error sending message:", error);
+                setError("An error occurred while sending the message.");
             } finally {
                 setLoading(false);
                 setInputValue(""); // Clear the input field after sending the message
             }
         }
     };
+
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -115,48 +174,28 @@ export function Chatbot() {
     };
     const [file, setFile] = useState<File | null>(null);
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files ? event.target.files[0] : null;
         if (file) {
             console.log(file);
             setFile(file);
+            setInfo("File added successfully.");
             // Reset the file input after selection
             setFileInputKey(Date.now());
         }
-    };
-
-    const handleUpload = async () => {
-        const formData = new FormData();
-        if (file) {
-            formData.append("file", file);
-        }
-
-        const requestOptions = {
-            method: "POST",
-            body: formData,
-            onUploadProgress: (progressEvent: ProgressEvent<EventTarget>) => {
-                const percentCompleted = Math.round(
-                    (progressEvent.loaded * 100) / progressEvent.total,
-                );
-                setProgress(percentCompleted);
-            },
-        };
-
-        // Replace with your API endpoint
-        await fetch("/your-api-endpoint", requestOptions);
     };
 
     return (
         <Container
             maxWidth="xl"
             component="div"
-            sx={{ height: "90vh", minHeight: "100vh", pl: "0", pr: "0" }}
+            sx={{ minHeight: "100vh", pl: "0", pr: "0" }}
         >
             <Paper
                 elevation={3}
                 sx={{
                     padding: "20px",
-                    maxHeight: "90vh",
+                    maxHeight: "85vh",
                     overflowY: "auto",
                     minHeight: "85vh",
                 }}
@@ -177,7 +216,16 @@ export function Chatbot() {
                     </Box>
                 )}
             </Paper>
+
             <Box sx={{ display: "flex", marginTop: "10px", gap: "10px" }}>
+                {file && !contextFile && (
+                    <Chip
+                        color="success"
+                        label={file.name}
+                        onDelete={() => setFile(null)}
+                    />
+                )}
+
                 <TextField
                     disabled={loading}
                     fullWidth
@@ -193,23 +241,19 @@ export function Chatbot() {
                     }}
                     onChange={handleInputChange}
                     InputProps={{
-                        startAdornment: (
+                        startAdornment: !contextFile && (
                             <InputAdornment position="start">
                                 <IconButton onClick={handleUploadClick} edge="start">
-                                    {progress == 0 && <AttachFileIcon />}
-                                    {progress > 0 && (
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={progress}
-                                        />
-                                    )}
+                                    <AttachFileIcon />
 
                                     <input
+                                        disabled={!!contextFile}
                                         type="file"
                                         id="file-upload-input"
                                         style={{ display: "none" }}
                                         onChange={handleFileChange}
                                         accept=".pdf"
+                                        max={1}
                                         key={fileInputKey}
                                     />
                                 </IconButton>
@@ -217,6 +261,7 @@ export function Chatbot() {
                         ),
                     }}
                 />
+
                 <LoadingButton
                     loading={loading}
                     disabled={!inputValue || loading}
@@ -227,6 +272,20 @@ export function Chatbot() {
                     <SendIcon />
                 </LoadingButton>
             </Box>
+            {contextFile && (
+                <Box>
+                    <Typography variant="h6" gutterBottom>
+                        File loaded in context:
+                    </Typography>
+                    <Tooltip title="AskGpt remembers the information from this file and can continue to answer questions on it. Use /pdf to continue asking questions.">
+                        <Chip
+                            onDelete={() => clearContextFile()}
+                            color="primary"
+                            label={contextFile}
+                        />
+                    </Tooltip>
+                </Box>
+            )}
         </Container>
     );
 }
