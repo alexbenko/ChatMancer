@@ -24,9 +24,11 @@ AskGPT, with its advanced conversation memory and image generation features, is 
 
 ### Future Planned Features
 
-1. Integration of Gpt vision so a user can upload an image and ask gpt questions on it.
+1. Reimplement the ability to upload text based files to ask questions / add to the context.Integration of Gpt vision so a user can upload an image and ask gpt questions on it.
 2. Support for a user to give gpt a url to ask questions on / add to the context
-3. Reimplement the ability to upload text based files to ask questions / add to the context.
+3. Integration of Gpt vision so a user can upload an image and ask gpt questions on it.
+4. Ability to choose model and possibly maintain context from the conversation.
+5. Websockets
 
 ## Usage Costs
 
