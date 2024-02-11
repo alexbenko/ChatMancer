@@ -176,7 +176,10 @@ export function Chatbot() {
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
-        if (file) {
+        const MAX_FILE_SIZE = 250 * 1024 * 1024;
+        if (file && file.size > MAX_FILE_SIZE) {
+            setError("File size should be less than 250MB.");
+        } else if (file) {
             console.log(file);
             setFile(file);
             setInfo("File added successfully.");
