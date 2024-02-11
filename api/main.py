@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
-
+from fastapi.middleware.cors import CORSMiddleware
 from init_askgpt import init_askGpt
 from lib.generate_image import generate_image_from_dalle
 from lib.chatbot import chat_message_history_to_dict
@@ -26,9 +26,20 @@ print(ENVIORNMENT)
 is_production = ENVIORNMENT == 'production'
 model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
+origins = [
+    "https://app-askgpt.fly.dev/" if is_production else
+    "http://localhost:5173/"
+]
+
 conversation = init_askGpt(OPENAI_API_KEY, model=model)
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/chat")
 async def get_chat():
     chat_history = chat_message_history_to_dict(conversation.memory.dict())
