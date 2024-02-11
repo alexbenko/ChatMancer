@@ -18,9 +18,9 @@ AskGPT is adept at remembering the context from previous user interactions, enab
 
 A distinctive feature of AskGPT is the integration of the `/image` command. Users can prompt the creation of images by entering `/image` followed by a descriptive brief. The application seamlessly processes this command, connecting with an image generation API (currently uses DALL·E) to produce visual content that aligns with the user's description. This innovative functionality adds a creative dimension to the interaction, enriching the overall experience.
 
-## Current State and Future Development
+### PDF Question and Answering
 
-AskGPT, with its advanced conversation memory and image generation features, is a sophisticated tool designed for a wide range of interactive experiences. As the application evolves, I will reintroduce the ability to interact with PDF documents, allowing users to discuss and analyze content within these documents seamlessly.
+Allows users to upload PDFs for direct inquiries. Upon uploading a document, users can immediately ask questions about its content. For subsequent queries related to the document, simply prefix your question with `/pdf` to maintain context. This enhancement streamlines the process of extracting information from documents, facilitating a focused and efficient conversation tailored to the content of the uploaded PDF.
 
 ### Future Planned Features
 
