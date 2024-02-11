@@ -69,7 +69,7 @@ async def post_chat(question: str = Form(...), file: Optional[UploadFile] = File
     global loaded_file
     if question.lower().startswith("/pdf") and loaded_file or (file and file.filename.endswith('.pdf')):
         print('PDF !!!!!')
-        if file:
+        if file and not loaded_file:
             contents = file.file.read()
 
             with open(file.filename, 'wb') as f:
