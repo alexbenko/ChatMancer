@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 from fastapi.middleware.cors import CORSMiddleware
-from init_askgpt import init_askGpt
+from init_chatbot import init_chatbot
 from lib.generate_image import generate_image_from_dalle
 from lib.chatbot import chat_message_history_to_dict
 from lib.retriever import get_pdf_retriever, run_document_q_and_a
@@ -27,11 +27,12 @@ is_production = ENVIORNMENT == 'production'
 model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
 origins = [
-    "https://app-askgpt.fly.dev/" if is_production else
+    "https://app-chatmancer.fly.dev/" if is_production else
     "http://localhost:5173/"
 ]
 
-conversation = init_askGpt(OPENAI_API_KEY, model=model)
+conversation = init_chatbot(OPENAI_API_KEY, model=model)
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -113,4 +114,4 @@ if is_production:
 if __name__ == '__main__':
     import uvicorn
     to_run = app if is_production else "main:app"
-    uvicorn.run(to_run, host="0.0.0.0", port=8000, log_level="debug", reload=ENVIORNMENT != 'production')
+    uvicorn.run(to_run, host="0.0.0.0", port=8000, log_level="debug", reload= not is_production)

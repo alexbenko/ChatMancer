@@ -1,4 +1,4 @@
-# AskGPT
+# ChatMancer
 
 ## Demo
 
@@ -6,17 +6,17 @@ https://github.com/alexbenko/AskGPT/assets/37863173/d4b3dff5-e4cc-40fa-b94e-7e42
 
 ## Description
 
-AskGPT is an app that leverages the power of a LLM (currently GPT) to offer a dynamic and interactive user experience, inspired by OpenAI's ChatGPT. This application stands out with its ability to maintain context in conversations and generate images based on user requests. And could potentially be a cheaper alternative than ChatGpt plus with the ability to use models only available using the OpenAi API.
+ChatMancer is an app that leverages the power of a LLM (currently GPT) to offer a dynamic and interactive user experience, inspired by OpenAI's ChatGPT. This application stands out with its ability to maintain context in conversations and generate images based on user requests. And could potentially be a cheaper alternative than ChatGpt plus with the ability to use models only available using the OpenAi API.
 
 ## Key Features
 
 ### Contextual Conversations
 
-AskGPT is adept at remembering the context from previous user interactions, enabling continuous and coherent dialogues. This feature allows for in-depth discussions and efficient follow-up questions, enhancing the user experience significantly.
+ChatMancer is adept at remembering the context from previous user interactions, enabling continuous and coherent dialogues. This feature allows for in-depth discussions and efficient follow-up questions, enhancing the user experience significantly.
 
 ### Image Generation Capability
 
-A distinctive feature of AskGPT is the integration of the `/image` command. Users can prompt the creation of images by entering `/image` followed by a descriptive brief. The application seamlessly processes this command, connecting with an image generation API (currently uses DALL·E) to produce visual content that aligns with the user's description. This innovative functionality adds a creative dimension to the interaction, enriching the overall experience.
+A distinctive feature is the integration of the `/image` command. Users can prompt the creation of images by entering `/image` followed by a descriptive brief. The application seamlessly processes this command, connecting with an image generation API (currently uses DALL·E) to produce visual content that aligns with the user's description. This innovative functionality adds a creative dimension to the interaction, enriching the overall experience.
 
 ### PDF Question and Answering
 
@@ -55,21 +55,21 @@ If you just want to play with this locally and know how to use docker follow the
 1. Clone the repository:
 
    ```
-   git clone https://github.com/alexbenko/AskGPT.git
+   git clone https://github.com/alexbenko/ChatMancer.git
    ```
 
    ```
-   cd AskGPT
+   cd ChatMancer
    ```
 
 2. Create and fill required values in .env file in /api
 3. Run command at root
    ```
-   docker build -t askgpt .
+   docker build -t chatmancer .
    ```
 4. Start docker
    ```
-   docker run -p 8000:8000 askgpt
+   docker run -p 8000:8000 chatmancer
    ```
 5. Click on the printed url, enter your password, and start chatting!
 
@@ -80,11 +80,11 @@ Follow the instructions below to set up the project on your local machine for de
 1. Clone the repository:
 
    ```
-   git clone https://github.com/alexbenko/AskGPT.git
+   git clone https://github.com/alexbenko/ChatMancer.git
    ```
 
    ```
-   cd AskGPT
+   cd ChatMancer
    ```
 
 2. Install server dependencies:

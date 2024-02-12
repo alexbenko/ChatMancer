@@ -214,7 +214,7 @@ export function Chatbot() {
                     <Box sx={{ display: "flex" }}>
                         <CircularProgress />
                         <Typography variant="body1">
-                            Loading AskGpt Response...
+                            Loading ChatMancer Response...
                         </Typography>
                     </Box>
                 )}
@@ -280,7 +280,7 @@ export function Chatbot() {
                     <Typography variant="h6" gutterBottom>
                         File loaded in context:
                     </Typography>
-                    <Tooltip title="AskGpt remembers the information from this file and can continue to answer questions on it. Use /pdf to continue asking questions.">
+                    <Tooltip title="ChatMancer remembers the information from this file and can continue to answer questions on it. Use /pdf to continue asking questions.">
                         <Chip
                             onDelete={() => clearContextFile()}
                             color="primary"
@@ -297,7 +297,7 @@ export default Chatbot;
 
 const ChatMessage = ({ message }: ChatMessageProps) => {
     const isAIMessage = message.type === "ai";
-    const senderName = isAIMessage ? "AskGpt" : "You";
+    const senderName = isAIMessage ? "ChatMancer" : "You";
     const avatarSrc = isAIMessage ? `/ai.webp` : `cat.webp`;
 
     return (
