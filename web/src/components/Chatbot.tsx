@@ -298,7 +298,7 @@ export default Chatbot;
 const ChatMessage = ({ message }: ChatMessageProps) => {
     const isAIMessage = message.type === "ai";
     const senderName = isAIMessage ? "ChatMancer" : "You";
-    const avatarSrc = isAIMessage ? `/ai.webp` : `cat.webp`;
+    const avatarSrc = isAIMessage ? `/chatmancer.webp` : `cat.webp`;
 
     return (
         <Box
