@@ -1,5 +1,5 @@
 # Stage 1: Build the React application
-FROM node:19 as build
+FROM node:23-slim AS build
 
 WORKDIR /app
 
@@ -24,6 +24,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
 
-ENV ENVIORNMENT production
+ENV ENVIORNMENT=production
 
 CMD ["python", "main.py"]
