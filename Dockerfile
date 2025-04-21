@@ -28,6 +28,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
 
-ENV ENVIRONMENT=production
+ENV ENVIORNMENT=production
 
 CMD ["python", "main.py"]
