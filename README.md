@@ -6,134 +6,124 @@ https://github.com/alexbenko/AskGPT/assets/37863173/d4b3dff5-e4cc-40fa-b94e-7e42
 
 ## Description
 
-ChatMancer is an app that leverages the power of a LLM (currently GPT) to offer a dynamic and interactive user experience, inspired by OpenAI's ChatGPT. This application stands out with its ability to maintain context in conversations and generate images based on user requests. And could potentially be a cheaper alternative than ChatGpt plus with the ability to use models only available using the OpenAi API.
+ChatMancer is a full-stack app powered by large language models (LLMs) that delivers an advanced, ChatGPT-like experience with added flexibility, control, and lower cost potential. Built on OpenAI's API, it supports contextual conversations, image generation, and document analysis — with full model-switching support.
 
 ## Key Features
 
-### Contextual Conversations
+### 👁‍ Contextual Conversations with Session Memory
+- Custom memory system preserves message history across requests using session IDs.
+- Tracks user/AI messages, model used, and content type (text or image).
+- Supports future features like analytics, streaming, or persistent logging.
 
-ChatMancer is adept at remembering the context from previous user interactions, enabling continuous and coherent dialogues. This feature allows for in-depth discussions and efficient follow-up questions, enhancing the user experience significantly.
+### 🌍 Dynamic Model Switching
+- Easily switch between models (e.g., GPT-4, Claude) at any time.
+- Session memory remains intact regardless of which model is used.
+- Chat history is tracked separately from the LLM logic for full flexibility.
 
-### Image Generation Capability
+### 📷 Natural Language Image Generation
+- Users can generate images using natural prompts like "draw a dragon in a coffee cup" — no command prefix needed.
+- Powered by DALL·E.
+- Image messages are stored with `content_type: "image"` for structured frontend rendering.
 
-A distinctive feature is the integration of the `/image` command. Users can prompt the creation of images by entering `/image` followed by a descriptive brief. The application seamlessly processes this command, connecting with an image generation API (currently uses DALL·E) to produce visual content that aligns with the user's description. This innovative functionality adds a creative dimension to the interaction, enriching the overall experience.
+### 📄 PDF Document Q&A
+- Upload a PDF and ask questions about it directly.
+- RAG (retrieval augmented generation) pipeline extracts and answers using the document.
+- Automatically detects relevant context without requiring a command prefix.
 
-### PDF Question and Answering
+### 🚀 Fully Customizable & Extendable
+- Uses custom `invoke_with_metadata()` to manage LLM execution, memory storage, and message tagging in one place.
+- Code blocks are rendered with fenced Markdown (```lang) and copy buttons for readability.
+- Flexible memory architecture supports per-message metadata, like model and content type.
 
-Allows users to upload PDFs for direct inquiries. Upon uploading a document, users can immediately ask questions about its content. For subsequent queries related to the document, simply prefix your question with `/pdf` to maintain context. This enhancement streamlines the process of extracting information from documents, facilitating a focused and efficient conversation tailored to the content of the uploaded PDF.
+## Future Features
 
-### Future Planned Features
-
-1. <strike>Reimplement the ability to upload text based files to ask questions / add to the context.</strike>
-2. Support for a user to give gpt a url to ask questions on / add to the context
-3. Integration of Gpt vision so a user can upload an image and ask gpt questions on it.
-4. Ability to choose model and possibly maintain context from the conversation.
-5. Websockets
+1. <strike>Text file upload support</strike> (already supported via PDF)
+2. Add support for pulling content from URLs
+3. GPT Vision / image Q&A support
+4. Persistent model selection with historical tracking
+5. WebSocket support for live updates
 
 ## Usage Costs
 
-Please note that running this application involves usage of certain APIs that are not free of charge. Costs depend on the volume of use. However, for personal use, these APIs are generally quite affordable. For instance, during my personal usage of the app, the highest monthly bill I ever received was only $8. I was using multiple services that month like Dalle and played A LOT with AutoGPT.
+This project uses OpenAI's APIs, which are not free. Costs depend on:
+- Number of requests
+- Models used (e.g., GPT-4 is more expensive than GPT-3.5)
+- Image generation and embeddings
 
-While this is relatively low, costs can vary based on usage, so it's important to monitor your usage to avoid any surprises. Please ensure you understand the pricing details of these APIs before using the application. In the billing section of the Open Ai Developer page, you can set usage limits. I set my account to max out at $20/month.
+Most casual users will spend <$10/month, but you can set limits via your OpenAI billing dashboard (e.g., $20 cap).
 
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your `.env` file in the /api directory. These variables are crucial for securing the application and connecting to external services.
+In your `.env` file under `/api`:
 
 ### `OPENAI_API_KEY`
-
-This is your OpenAI API key, used to authenticate requests to OpenAI services such as GPT and DALL-E. Ensure that you have an active OpenAI account and have generated an API key. This key enables the application to interact with OpenAI's powerful AI models.
+Your OpenAI API key. Required for GPT and DALL-E access.
 
 ### `PASSWORD`
-
-This variable acts as a simple security measure to protect access to your project, especially when deployed on the internet. You can set this to any string value you prefer. This password should be kept confidential and only shared with authorized users.
+Password protection for the app interface (basic access control).
 
 ## Project Setup With Docker
 
-If you just want to play with this locally and know how to use docker follow these steps.
+```bash
+git clone https://github.com/alexbenko/ChatMancer.git
+cd ChatMancer
+```
 
-1. Clone the repository:
-
-   ```
-   git clone https://github.com/alexbenko/ChatMancer.git
-   ```
-
-   ```
-   cd ChatMancer
-   ```
-
-2. Create and fill required values in .env file in /api
-3. Run command at root
-   ```
-   docker build -t chatmancer .
-   ```
-4. Start docker
-   ```
-   docker run -p 8000:8000 chatmancer
-   ```
-5. Click on the printed url, enter your password, and start chatting!
+1. Add `.env` to `/api` with required variables.
+2. Build Docker image:
+```bash
+docker build -t chatmancer .
+```
+3. Run it:
+```bash
+docker run -p 8000:8000 chatmancer
+```
+4. Open the printed URL, enter the password, and chat away.
 
 ## Project Setup Without Docker
 
-Follow the instructions below to set up the project on your local machine for development and testing purposes.
+```bash
+git clone https://github.com/alexbenko/ChatMancer.git
+cd ChatMancer
+```
 
-1. Clone the repository:
-
-   ```
-   git clone https://github.com/alexbenko/ChatMancer.git
-   ```
-
-   ```
-   cd ChatMancer
-   ```
-
-2. Install server dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Ensure you have an API key from OpenAI.
-
-4. Set your enviornment variables in a .env file inside the /api directory:
-
-   ```
-   OPENAI_API_KEY=your_openai_key
-   PASSWORD=your_chosen_password
-   ```
-
-   Replace `your_openai_key` with your actual OpenAI key.
-
-5. Navigate to the `api` directory and start the Python backend application:
-
-   ```
-   python main.py
-   ```
-
-   This will launch the backend server.
-
-6. Navigate into the `web` directory and install dependencies, then build the Vite.js project:
-
-   ```
-   cd web
-   npm install
-   npm run dev
-   ```
-
-7. You can access the application by navigating to the printed URL.
+1. Install Python server deps:
+```bash
+pip install -r requirements.txt
+```
+2. Add your `.env` file in `/api`:
+```env
+OPENAI_API_KEY=your_key
+PASSWORD=your_password
+```
+3. Start backend:
+```bash
+cd api
+python main.py
+```
+4. Start frontend:
+```bash
+cd ../web
+npm install
+npm run dev
+```
+5. Visit the printed URL and authenticate.
 
 ## Built With
 
-- [Vite](https://vitejs.dev/) - A lightweight and fast build tool for modern JavaScript applications, designed for quick development and efficient production builds.
-- [React](https://react.dev/) - A JavaScript library for building user interfaces, developed and maintained by Facebook.
-- [TypeScript](https://www.typescriptlang.org/) - A statically typed superset of JavaScript
-- [Python 3.11](https://www.python.org/downloads/release/python-3110/) - A high-level, interpreted programming language
-- [FastApi](https://fastapi.tiangolo.com/) - A modern, fast (high-performance), web framework for building APIs with Python 3.8+ based on standard Python type hints.
-- [NPM](https://www.npmjs.com/) - A package manager for JavaScript, widely used to manage dependencies in Javascript projects and to share and install open-source JavaScript packages.
-- [PIP](https://pypi.org/project/pip/) - A package manager for Python that simplifies the installation and management of software packages from the Python Package Index (PyPI).
+- [Vite](https://vitejs.dev/) — Lightning-fast frontend tooling
+- [React](https://react.dev/) — UI library
+- [TypeScript](https://www.typescriptlang.org/) — Static typing
+- [Python 3.11](https://www.python.org/downloads/release/python-3110/) — Backend language
+- [FastAPI](https://fastapi.tiangolo.com/) — Async web framework
+- [LangChain](https://www.langchain.com/) — LLM orchestration and memory
+- [OpenAI API](https://platform.openai.com/) — GPT + DALL-E access
 
 ## Contributing
 
-Any contributions you make are greatly appreciated.
+Open to PRs, ideas, and feedback!
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+see `LICENSE` for full details.
+
