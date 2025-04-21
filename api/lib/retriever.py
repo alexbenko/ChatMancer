@@ -1,4 +1,3 @@
-from langchain.chains import LLMChain
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
@@ -9,31 +8,32 @@ from langchain.prompts import (
 )
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from typing import Dict
-
+from langchain.schema.vectorstore import VectorStoreRetriever
 from langchain_core.runnables import RunnablePassthrough
 
-def get_pdf_retriever(OPENAI_API_KEY, k=4, file_path = None):
-    loader = PyPDFLoader(file_path)
-    data = loader.load()
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
-    all_splits = text_splitter.split_documents(data)
-
-    #this is not meant for production
-    #in production you would use a cloud db like Pinecone to store the document info after it was embedded
-    #this will load the document into memory each time
-    #which is fine for a server that gets reset every couple minutes
-    vectorstore = Chroma.from_documents(documents=all_splits, embedding=OpenAIEmbeddings(api_key=OPENAI_API_KEY))
-    retriever = vectorstore.as_retriever(k=k)
-    return retriever
+from lib.session import get_session_history
 
 
+retriever_cache = {}
+def get_cached_pdf_retriever(OPENAI_API_KEY, file_path: str, k=4) -> VectorStoreRetriever:
+    if file_path not in retriever_cache:
+        loader = PyPDFLoader(file_path)
+        data = loader.load()
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+        all_splits = text_splitter.split_documents(data)
 
+        vectorstore = Chroma.from_documents(
+            documents=all_splits,
+            embedding=OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+        )
+        retriever = vectorstore.as_retriever(k=k)
+        retriever_cache[file_path] = retriever
 
-#TODO figure out type of retriever
-def run_document_q_and_a(conversation: LLMChain, retriever , query: str):
-    conversation.memory.chat_memory.add_user_message(query)
+    return retriever_cache[file_path]
 
-    chat = ChatOpenAI(model="gpt-3.5-turbo")
+def run_document_q_and_a(retriever , query: str, session_id: str = "abc123", model="gpt-3.5-turbo"):
+    history = get_session_history(session_id)
+    chat = ChatOpenAI(model=model)
 
     question_answering_prompt = ChatPromptTemplate.from_messages(
         [
@@ -48,20 +48,17 @@ def run_document_q_and_a(conversation: LLMChain, retriever , query: str):
     document_chain = create_stuff_documents_chain(chat, question_answering_prompt)
 
     def parse_retriever_input(params: Dict):
-        return params["messages"][-1].content
+        return params["messages"][-1].get("content")
 
-    retrieval_chain_with_only_answer = (
-        RunnablePassthrough.assign(
-            context=parse_retriever_input | retriever,
-        ) | document_chain
+    retrieval_chain = (
+        RunnablePassthrough.assign(context=parse_retriever_input | retriever)
+        | document_chain
     )
 
-    response = retrieval_chain_with_only_answer.invoke(
-        {
-            "messages": conversation.memory.chat_memory.messages,
-        },
-    )
+    response = retrieval_chain.invoke({
+        "messages": history.messages
+    })
 
-    conversation.memory.chat_memory.add_ai_message(response)
     return response
+
 

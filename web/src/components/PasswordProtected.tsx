@@ -76,6 +76,7 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
         value={password}
         onChange={handlePasswordChange}
         label="Password"
+        autoComplete="current-password"
       />
       <LoadingButton loading={loading} type="submit">Submit</LoadingButton>
       {error && <Typography color="error">{error}</Typography>}
