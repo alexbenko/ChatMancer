@@ -16,7 +16,7 @@ from lib.retriever import get_cached_pdf_retriever, run_document_q_and_a
 class ChatIn(BaseModel):
     question: str
 
-load_dotenv(override=True)
+load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PASSWORD = os.getenv('PASSWORD')
 
