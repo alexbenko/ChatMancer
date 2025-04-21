@@ -8,7 +8,6 @@ pyPDF2
 tiktoken
 pypdf
 python-dotenv
-pandas
 tabulate
 chromadb
 python-multipart
