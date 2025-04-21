@@ -16,8 +16,8 @@ FROM python:3.13-alpine
 
 WORKDIR /app
 
-# Install system dependencies required for Python and Rust
-RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev cargo rust
+# Install system dependencies required for Python, Rust, and C++
+RUN apk add --no-cache gcc g++ musl-dev libffi-dev openssl-dev cargo rust
 
 # Copy the Python server files
 COPY ./api .
