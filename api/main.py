@@ -1,3 +1,4 @@
+import secrets
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, File, Form
 from typing import Optional
 from fastapi.staticfiles import StaticFiles
@@ -8,7 +9,7 @@ from dotenv import load_dotenv
 import os
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from lib.token import TOKEN_EXPIRATION_MINUTES, create_token, verify_cookie_token
+from lib.token import TOKEN_EXPIRATION_MINUTES, create_token, generate_csrf_token, verify_cookie_token, verify_csrf_cookie
 from lib.utils import invoke_with_metadata, is_image_message, is_image_request
 from init_chatbot import init_chatbot,get_session_history
 from lib.generate_image import generate_image_from_dalle
@@ -29,14 +30,7 @@ session_id = os.getenv('SESSION_ID', 'abc123')
 is_production = ENVIORNMENT == 'production'
 model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    chatbot = init_chatbot(OPENAI_API_KEY, model, 0.7,session_id, True)
-    yield
-    # Clean up
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -45,7 +39,7 @@ app.add_middleware(
 )
 
 @app.get('/models')
-async def get_models(auth=Depends(verify_cookie_token)):
+async def get_models(auth=Depends(verify_cookie_token),csrf=Depends(verify_csrf_cookie)):
     client = OpenAI()
     models = client.models.list().model_dump(mode="python")['data']
     non_image_models = [
@@ -69,19 +63,19 @@ def get_chat_history(id):
     }
 
 @app.get("/chat")
-async def get_chat(auth=Depends(verify_cookie_token)):
+async def get_chat(auth=Depends(verify_cookie_token),csrf=Depends(verify_csrf_cookie)):
     data = get_chat_history(session_id)
 
     return {"response": data}
 
 loaded_file = None
 @app.get("/context_file")
-async def get_context_file(auth=Depends(verify_cookie_token)):
+async def get_context_file(auth=Depends(verify_cookie_token),csrf=Depends(verify_csrf_cookie)):
     global loaded_file
     return {"response": loaded_file}
 
 @app.post("/clear_context_file")
-async def reset_context_file(auth=Depends(verify_cookie_token)):
+async def reset_context_file(auth=Depends(verify_cookie_token), csrf=Depends(verify_csrf_cookie)):
     global loaded_file
     if loaded_file is not None:
         try:
@@ -97,7 +91,8 @@ async def post_chat(
     question: str = Form(...),
     file: Optional[UploadFile] = File(None),
     selected_model: Optional[str] = Form(None),
-    auth=Depends(verify_cookie_token)
+    auth=Depends(verify_cookie_token),
+    csrf=Depends(verify_csrf_cookie),
 ):
     try:
         global loaded_file
@@ -168,7 +163,9 @@ async def verify_password(password_in: PasswordIn):
 
     if password_in.password == correct_password:
         token = create_token()
-        response = JSONResponse(content={"message": "Password verified"})
+        csrf_token = generate_csrf_token()
+
+        response = JSONResponse(content={"message": "Password verified", "crsf_token": csrf_token})
         response.set_cookie(
             key="chat_token",
             value=token,
@@ -177,9 +174,18 @@ async def verify_password(password_in: PasswordIn):
             samesite="strict",
             max_age=TOKEN_EXPIRATION_MINUTES * 60
         )
+        response.set_cookie(
+            key="csrf_token",
+            value=csrf_token,
+            httponly=False,   # ✅ allow frontend JS to read and send in header
+            secure=is_production,
+            samesite="strict",
+            max_age=TOKEN_EXPIRATION_MINUTES * 60
+        )
         return response
     else:
         raise HTTPException(status_code=400, detail=":(")
+
 
 if is_production:
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
@@ -189,4 +195,5 @@ if __name__ == '__main__':
 
     print(f'Starting server in {ENVIORNMENT} mode.')
     to_run = app if is_production else "main:app"
+    init_chatbot(OPENAI_API_KEY, model, 0.7,session_id, True)
     uvicorn.run(to_run, host="0.0.0.0", port=8000, log_level="debug", reload= not is_production)

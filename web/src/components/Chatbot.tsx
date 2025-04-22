@@ -45,6 +45,8 @@ export function Chatbot() {
     const [error, setError] = useState<string | null>(null);
     const [info, setInfo] = useState<string | null>(null);
     const [contextFile, setContextFile] = useState<string | null>(null);
+    const [csrfToken] = useLocalStorage<string | null>('csrfToken', null);
+
     const sendNotification = useNotification();
     const defaultModel = isProduction ? "gpt-4" : "gpt-3.5-turbo";
     useEffect(() => {
@@ -64,6 +66,9 @@ export function Chatbot() {
             const response = await fetch(`${apiRootPath}/clear_context_file`, {
                 method: "POST",
                 credentials: "include",
+                headers: {
+                    "x-csrf-token": csrfToken!
+                }
             });
 
             const data = await response.json();
@@ -84,9 +89,13 @@ export function Chatbot() {
             const response = await fetch(`${apiRootPath}/models`, {
                 method: "GET",
                 credentials: "include",
+                headers: {
+                    "x-csrf-token": csrfToken!
+                }
+
             });
             const data = await response.json();
-            console.log(data);
+
             if (data?.response) {
                 return data.response
             }
@@ -101,6 +110,9 @@ export function Chatbot() {
             const response = await fetch(`${apiRootPath}/context_file`,{
                 method: "GET",
                 credentials: "include",
+                headers: {
+                    "x-csrf-token": csrfToken!
+                }
             });
             const data = await response.json();
 
@@ -129,9 +141,12 @@ export function Chatbot() {
                 const response = await fetch(`${apiRootPath}/chat`, {
                     method: "GET",
                     credentials: "include",
+                    headers: {
+                        "x-csrf-token": csrfToken!
+                    }
                 });
                 const data = await response.json();
-
+                debugger;
                 setMessages(data.response.messages);
                 if(!models.length){
                     const models = await fetchModels();
@@ -179,11 +194,15 @@ export function Chatbot() {
                     method: "POST",
                     body: formData,
                     credentials: "include",
+                    headers: {
+                        "x-csrf-token": csrfToken!
+                    }
                 };
 
                 const response = await fetch(`${apiRootPath}/chat`, {
                     ...requestOptions,
                     credentials: "include" as RequestCredentials,
+
                 });
                 const data = await response.json();
 

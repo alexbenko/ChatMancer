@@ -18,8 +18,6 @@ def init_chatbot(
     session_id='abc123',
     initialize=False
 ):
-    print('\nInitializing chatbot with model:', model)
-
     model_kwargs = {}
     if "gpt" in model and not model.endswith("vision"):
         model_kwargs["temperature"] = temperature
@@ -33,13 +31,4 @@ def init_chatbot(
     ])
 
     chain = prompt | llm
-
-    if initialize:
-        invoke_with_metadata(
-            chain=chain,
-            question="Hello who are you? And what can you do?",
-            session_id=session_id,
-            model=model
-        )
-
     return chain

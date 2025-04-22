@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab';
 import { TextField, Typography, Box } from '@mui/material';
 import { ChangeEvent, FormEvent, ReactNode, useState } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 interface PasswordProtectedProps {
   children: ReactNode;
 }
@@ -21,7 +22,7 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
   const [password, setPassword] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [_, setCsrfToken] = useLocalStorage<string | null>('csrfToken', null);
   const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
   };
@@ -38,11 +39,12 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
         body: JSON.stringify({ password }),
       });
 
-
-      if (response.ok) {
+      const data = await response.json();
+      if (response.ok && data?.crsf_token) {
+        setCsrfToken(data.crsf_token);
         setIsAuthenticated(true);
       } else {
-        const { message } = await response.json();
+        const { message } = data
         console.error(message)
         setError(message);
       }
