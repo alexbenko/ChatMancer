@@ -1,5 +1,7 @@
-from langchain_core.runnables import Runnable
+from init_chatbot import init_chatbot
 from lib.session import get_session_history
+from typing import Dict, Tuple
+from langchain_core.runnables import Runnable
 
 
 def is_image_request(text: str) -> bool:
@@ -19,25 +21,30 @@ def is_image_message(content: str) -> bool:
     return content.strip().startswith("Here is the image you requested:")
 
 
+model_chain_cache: Dict[Tuple[str, str], Runnable] = {}
+
+
 def invoke_with_metadata(
-    chain: Runnable,
     question: str,
     session_id: str,
     model: str,
     content_type: str = "text",
+    api_key: str = None,
 ):
+    # Get chat history
     history = get_session_history(session_id)
+    cache_key = (session_id, model)
 
-    # Add user message
+    # Reuse or create chain
+    if cache_key not in model_chain_cache:
+        model_chain_cache[cache_key] = init_chatbot(api_key, model)
+
+    chain = model_chain_cache[cache_key]
+
+    # Run and log
+    response = chain.invoke({"question": question, "chat_history": history.messages})
+
     history.add_user_message(question)
-
-    # Run the chain manually with message history
-    response = chain.invoke(
-        {"question": question, "chat_history": history.messages},
-        {"configurable": {"session_id": session_id}},
-    )
-
-    # Add AI response with model + content type
     history.add_ai_message(
         response.content if hasattr(response, "content") else response,
         model=model,

@@ -17,7 +17,6 @@ from lib.token import (
     verify_csrf_cookie,
 )
 from lib.utils import invoke_with_metadata, is_image_message, is_image_request
-from init_chatbot import init_chatbot
 from lib.generate_image import generate_image_from_dalle
 from lib.retriever import get_cached_pdf_retriever, run_document_q_and_a
 
@@ -173,13 +172,7 @@ async def post_chat(
                     ai_response, model=current_model, content_type="text"
                 )
         else:
-            # 4. Fallback to chatbot conversation
-            chatbot = init_chatbot(
-                OPENAI_API_KEY, current_model, 0.7, session_id, initialize=False
-            )
-
             ai_response = invoke_with_metadata(
-                chain=chatbot,
                 question=question,
                 session_id=session_id,
                 model=current_model,
@@ -238,7 +231,6 @@ if __name__ == "__main__":
 
     print(f"Starting server in {ENVIORNMENT} mode.")
     to_run = app if is_production else "main:app"
-    init_chatbot(OPENAI_API_KEY, model, 0.7, session_id, True)
     uvicorn.run(
         to_run, host="0.0.0.0", port=8000, log_level="debug", reload=not is_production
     )

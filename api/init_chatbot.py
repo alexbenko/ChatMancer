@@ -12,8 +12,6 @@ def init_chatbot(
     api_key,
     model="gpt-3.5-turbo",
     temperature=0.7,
-    session_id="abc123",
-    initialize=False,
 ):
     model_kwargs = {}
     if "gpt" in model and not model.endswith("vision"):
