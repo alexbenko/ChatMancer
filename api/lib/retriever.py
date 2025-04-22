@@ -15,7 +15,11 @@ from lib.session import get_session_history
 
 
 retriever_cache = {}
-def get_cached_pdf_retriever(OPENAI_API_KEY, file_path: str, k=4) -> VectorStoreRetriever:
+
+
+def get_cached_pdf_retriever(
+    OPENAI_API_KEY, file_path: str, k=4
+) -> VectorStoreRetriever:
     if file_path not in retriever_cache:
         loader = PyPDFLoader(file_path)
         data = loader.load()
@@ -23,15 +27,17 @@ def get_cached_pdf_retriever(OPENAI_API_KEY, file_path: str, k=4) -> VectorStore
         all_splits = text_splitter.split_documents(data)
 
         vectorstore = Chroma.from_documents(
-            documents=all_splits,
-            embedding=OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+            documents=all_splits, embedding=OpenAIEmbeddings(api_key=OPENAI_API_KEY)
         )
         retriever = vectorstore.as_retriever(k=k)
         retriever_cache[file_path] = retriever
 
     return retriever_cache[file_path]
 
-def run_document_q_and_a(retriever , query: str, session_id: str = "abc123", model="gpt-3.5-turbo"):
+
+def run_document_q_and_a(
+    retriever, query: str, session_id: str = "abc123", model="gpt-3.5-turbo"
+):
     history = get_session_history(session_id)
     chat = ChatOpenAI(model=model)
 
@@ -55,10 +61,6 @@ def run_document_q_and_a(retriever , query: str, session_id: str = "abc123", mod
         | document_chain
     )
 
-    response = retrieval_chain.invoke({
-        "messages": history.messages
-    })
+    response = retrieval_chain.invoke({"messages": history.messages})
 
     return response
-
-

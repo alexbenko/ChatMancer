@@ -1,4 +1,4 @@
-import secrets
+import bcrypt
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, File, Form
 from typing import Optional
 from fastapi.staticfiles import StaticFiles
@@ -7,28 +7,35 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
-from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from lib.token import TOKEN_EXPIRATION_MINUTES, create_token, generate_csrf_token, verify_cookie_token, verify_csrf_cookie
+from lib.token import (
+    TOKEN_EXPIRATION_MINUTES,
+    create_token,
+    generate_csrf_token,
+    verify_cookie_token,
+    verify_csrf_cookie,
+)
 from lib.utils import invoke_with_metadata, is_image_message, is_image_request
-from init_chatbot import init_chatbot,get_session_history
+from init_chatbot import init_chatbot, get_session_history
 from lib.generate_image import generate_image_from_dalle
 from lib.retriever import get_cached_pdf_retriever, run_document_q_and_a
+
 
 class ChatIn(BaseModel):
     question: str
 
+
 load_dotenv()
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-PASSWORD = os.getenv('PASSWORD')
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+PASSWORD = os.getenv("PASSWORD")
 
 assert PASSWORD is not None
 assert OPENAI_API_KEY is not None
 
-ENVIORNMENT = os.getenv('ENVIORNMENT', 'development')
-session_id = os.getenv('SESSION_ID', 'abc123')
-is_production = ENVIORNMENT == 'production'
-model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
+ENVIORNMENT = os.getenv("ENVIORNMENT", "development")
+session_id = os.getenv("SESSION_ID", "abc123")
+is_production = ENVIORNMENT == "production"
+model = "gpt-4" if is_production else "gpt-3.5-turbo"
 
 app = FastAPI()
 app.add_middleware(
@@ -38,15 +45,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get('/models')
-async def get_models(auth=Depends(verify_cookie_token),csrf=Depends(verify_csrf_cookie)):
+
+@app.get("/models")
+async def get_models(
+    auth=Depends(verify_cookie_token), csrf=Depends(verify_csrf_cookie)
+):
     client = OpenAI()
-    models = client.models.list().model_dump(mode="python")['data']
+    models = client.models.list().model_dump(mode="python")["data"]
     non_image_models = [
-        model.get('id') for model in models
-        if not any(term in model.get('id') for term in ["dall-e", "image", "audio", "realtime",])
+        model.get("id")
+        for model in models
+        if not any(
+            term in model.get("id")
+            for term in [
+                "dall-e",
+                "image",
+                "audio",
+                "realtime",
+            ]
+        )
     ]
     return {"response": non_image_models}
+
 
 def get_chat_history(id):
     history = get_session_history(id)
@@ -55,36 +75,50 @@ def get_chat_history(id):
             {
                 "type": msg["type"],
                 "content": msg["content"],
-                "content_type": msg.get("content_type", "image" if is_image_message(msg["content"]) else "text"),
-                "model": msg.get("model", "unknown")
+                "content_type": msg.get(
+                    "content_type",
+                    "image" if is_image_message(msg["content"]) else "text",
+                ),
+                "model": msg.get("model", "unknown"),
             }
             for msg in history.messages
         ]
     }
 
+
 @app.get("/chat")
-async def get_chat(auth=Depends(verify_cookie_token),csrf=Depends(verify_csrf_cookie)):
+async def get_chat(auth=Depends(verify_cookie_token), csrf=Depends(verify_csrf_cookie)):
     data = get_chat_history(session_id)
 
     return {"response": data}
 
+
 loaded_file = None
+
+
 @app.get("/context_file")
-async def get_context_file(auth=Depends(verify_cookie_token),csrf=Depends(verify_csrf_cookie)):
+async def get_context_file(
+    auth=Depends(verify_cookie_token), csrf=Depends(verify_csrf_cookie)
+):
     global loaded_file
     return {"response": loaded_file}
 
+
 @app.post("/clear_context_file")
-async def reset_context_file(auth=Depends(verify_cookie_token), csrf=Depends(verify_csrf_cookie)):
+async def reset_context_file(
+    auth=Depends(verify_cookie_token), csrf=Depends(verify_csrf_cookie)
+):
     global loaded_file
     if loaded_file is not None:
         try:
             os.remove(loaded_file)
-        except:
+        except Exception as e:
+            print(e)
             return {"response": "Error deleting file"}
 
     loaded_file = None
     return {"response": "Context file has been reset"}
+
 
 @app.post("/chat")
 async def post_chat(
@@ -100,9 +134,9 @@ async def post_chat(
         current_model = selected_model if selected_model is not None else model
 
         # 1. Handle PDF upload
-        if file and file.filename.endswith('.pdf'):
+        if file and file.filename.endswith(".pdf"):
             contents = file.file.read()
-            with open(file.filename, 'wb') as f:
+            with open(file.filename, "wb") as f:
                 f.write(contents)
             loaded_file = file.filename
 
@@ -115,12 +149,13 @@ async def post_chat(
 
             history = get_session_history(session_id)
             history.add_user_message(question)
-            history.add_ai_message(ai_response, model=current_model, content_type="image")
+            history.add_ai_message(
+                ai_response, model=current_model, content_type="image"
+            )
         # 3. Try PDF Q&A if a PDF is loaded
         elif loaded_file:
             retriever = get_cached_pdf_retriever(OPENAI_API_KEY, file_path=loaded_file)
             relevant_docs = relevant_docs = retriever.invoke(question)
-
 
             if relevant_docs:
                 history = get_session_history(session_id)
@@ -130,57 +165,64 @@ async def post_chat(
                     retriever=retriever,
                     query=question,
                     session_id=session_id,
-                    model=current_model
+                    model=current_model,
                 )
 
-                history.add_ai_message(ai_response, model=current_model, content_type="text")
+                history.add_ai_message(
+                    ai_response, model=current_model, content_type="text"
+                )
         else:
             # 4. Fallback to chatbot conversation
-            chatbot = init_chatbot(OPENAI_API_KEY, current_model, 0.7, session_id, initialize=False)
+            chatbot = init_chatbot(
+                OPENAI_API_KEY, current_model, 0.7, session_id, initialize=False
+            )
 
             ai_response = invoke_with_metadata(
                 chain=chatbot,
                 question=question,
                 session_id=session_id,
                 model=current_model,
-                content_type="text"
+                content_type="text",
             )
 
         res = get_chat_history(session_id)
         return res
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail="An error occurred while processing your request.")
-
+        raise HTTPException(
+            status_code=500, detail="An error occurred while processing your request."
+        )
 
 
 class PasswordIn(BaseModel):
     password: str
 
+
 @app.post("/verify-password")
 async def verify_password(password_in: PasswordIn):
-    correct_password = PASSWORD
-
-    if password_in.password == correct_password:
+    if bcrypt.checkpw(password_in.password.encode("utf-8"), PASSWORD.encode("utf-8")):
         token = create_token()
         csrf_token = generate_csrf_token()
 
-        response = JSONResponse(content={"message": "Password verified", "crsf_token": csrf_token})
+        response = JSONResponse(
+            content={"message": "Password verified", "crsf_token": csrf_token}
+        )
+
         response.set_cookie(
             key="chat_token",
             value=token,
             httponly=True,
             secure=is_production,
             samesite="strict",
-            max_age=TOKEN_EXPIRATION_MINUTES * 60
+            max_age=TOKEN_EXPIRATION_MINUTES * 60,
         )
         response.set_cookie(
             key="csrf_token",
             value=csrf_token,
-            httponly=False,   # ✅ allow frontend JS to read and send in header
+            httponly=False,
             secure=is_production,
             samesite="strict",
-            max_age=TOKEN_EXPIRATION_MINUTES * 60
+            max_age=TOKEN_EXPIRATION_MINUTES * 60,
         )
         return response
     else:
@@ -190,10 +232,12 @@ async def verify_password(password_in: PasswordIn):
 if is_production:
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import uvicorn
 
-    print(f'Starting server in {ENVIORNMENT} mode.')
+    print(f"Starting server in {ENVIORNMENT} mode.")
     to_run = app if is_production else "main:app"
-    init_chatbot(OPENAI_API_KEY, model, 0.7,session_id, True)
-    uvicorn.run(to_run, host="0.0.0.0", port=8000, log_level="debug", reload= not is_production)
+    init_chatbot(OPENAI_API_KEY, model, 0.7, session_id, True)
+    uvicorn.run(
+        to_run, host="0.0.0.0", port=8000, log_level="debug", reload=not is_production
+    )

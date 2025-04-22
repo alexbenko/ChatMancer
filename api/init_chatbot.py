@@ -2,21 +2,18 @@ from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
-    SystemMessagePromptTemplate
+    SystemMessagePromptTemplate,
 )
 from langchain_openai import ChatOpenAI
-from lib.session import get_session_history
-from lib.utils import invoke_with_metadata
 from chatbot_prompt import CHATBOT_SYSTEM_PROMPT
-from langchain_core.runnables.history import RunnableWithMessageHistory
 
 
 def init_chatbot(
     api_key,
-    model='gpt-3.5-turbo',
+    model="gpt-3.5-turbo",
     temperature=0.7,
-    session_id='abc123',
-    initialize=False
+    session_id="abc123",
+    initialize=False,
 ):
     model_kwargs = {}
     if "gpt" in model and not model.endswith("vision"):
@@ -24,11 +21,13 @@ def init_chatbot(
 
     llm = ChatOpenAI(api_key=api_key, model=model, **model_kwargs)
 
-    prompt = ChatPromptTemplate.from_messages([
-        SystemMessagePromptTemplate.from_template(CHATBOT_SYSTEM_PROMPT),
-        MessagesPlaceholder(variable_name="chat_history"),
-        HumanMessagePromptTemplate.from_template("{question}")
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessagePromptTemplate.from_template(CHATBOT_SYSTEM_PROMPT),
+            MessagesPlaceholder(variable_name="chat_history"),
+            HumanMessagePromptTemplate.from_template("{question}"),
+        ]
+    )
 
     chain = prompt | llm
     return chain
