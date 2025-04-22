@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 from fastapi.middleware.cors import CORSMiddleware
+from lib.session import get_session_history
 from lib.token import (
     TOKEN_EXPIRATION_MINUTES,
     create_token,
@@ -16,7 +17,7 @@ from lib.token import (
     verify_csrf_cookie,
 )
 from lib.utils import invoke_with_metadata, is_image_message, is_image_request
-from init_chatbot import init_chatbot, get_session_history
+from init_chatbot import init_chatbot
 from lib.generate_image import generate_image_from_dalle
 from lib.retriever import get_cached_pdf_retriever, run_document_q_and_a
 
