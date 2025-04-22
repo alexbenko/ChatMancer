@@ -4,6 +4,20 @@
 
 https://github.com/alexbenko/AskGPT/assets/37863173/d4b3dff5-e4cc-40fa-b94e-7e422c63ef57
 
+## 🔑 Highlights:
+✍️ Contextual Conversations – remembers your chat history across messages
+
+🤖 Model Switching – change models (e.g. GPT-3.5 ↔ GPT-4) on the fly without losing context
+
+🖼️ Image Generation – describe what you want and get visuals via DALL·E
+
+📄 PDF Q&A – upload a PDF and ask natural questions about its contents
+
+🔐 Secure Auth – session-based access with password + token + CSRF protection
+
+🧠 Code Display – beautifully rendered code with syntax highlighting and language labels
+
+
 ## Description
 
 ChatMancer is a full-stack app powered by large language models (LLMs) that delivers an advanced, ChatGPT-like experience with added flexibility, control, and lower cost potential. Built on OpenAI's API, it supports contextual conversations, image generation, and document analysis — with full model-switching support.
