@@ -205,12 +205,12 @@ export function Chatbot() {
 
                 });
                 const data = await response.json();
-
-                if (data && data.response?.messages) {
+                debugger
+                if (data && data?.messages) {
                     console.log(data.response);
 
                     setMessages(() => [
-                        ...data.response.messages,
+                        ...data.messages,
                     ]);
                     if (file) setFile(null);
                 } else {
@@ -397,17 +397,13 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: isAIMessage ? "flex-start" : "flex-end",
-                maxWidth: "80%",
                 margin: isAIMessage ? "10px auto 10px 10px" : "10px 10px 10px auto",
                 backgroundColor: isAIMessage ? "#f5f5f5" : "blue",
                 color: isAIMessage ? "black" : "white",
                 borderRadius: isAIMessage ? "10px 10px 10px 0" : "10px 10px 0 10px",
                 padding: "10px",
-                overflowWrap: "break-word", // Break long words to prevent overflow
-                wordWrap: "break-word", // Ensure long words wrap properly
-                whiteSpace: "pre-wrap",
-                boxSizing: "border-box",
-                overflowX: "auto",
+                width: "fit-content",
+                maxWidth: "90%",
             }}
         >
             {message.content_type === 'image' ?
