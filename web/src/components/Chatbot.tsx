@@ -272,6 +272,13 @@ export function Chatbot() {
                     minHeight: "85vh",
                 }}
             >
+                {!messages.length && (
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        <Typography variant="h5">
+                            Start a conversation with ChatMancer!
+                        </Typography>
+                    </Box>
+                )}
                 {messages.map((message, index) => (
                     <ChatMessage key={index} message={message} />
                 ))}
