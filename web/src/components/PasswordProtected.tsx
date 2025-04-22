@@ -38,6 +38,7 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
         body: JSON.stringify({ password }),
       });
 
+
       if (response.ok) {
         setIsAuthenticated(true);
       } else {
@@ -45,14 +46,17 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
         console.error(message)
         setError(message);
       }
+
     } catch (error) {
-      setError('An error occurred while verifying the password.');
+      console.error(error)
+      setError('An error occurred while verifying the password. Please try again later.');
     } finally{
       setLoading(false)
     }
   };
 
   if (isAuthenticated) {
+
     return children;
   }
 

@@ -63,6 +63,7 @@ export function Chatbot() {
         try {
             const response = await fetch(`${apiRootPath}/clear_context_file`, {
                 method: "POST",
+                credentials: "include",
             });
 
             const data = await response.json();
@@ -80,7 +81,10 @@ export function Chatbot() {
 
     const fetchModels = async () => {
         try {
-            const response = await fetch(`${apiRootPath}/models`);
+            const response = await fetch(`${apiRootPath}/models`, {
+                method: "GET",
+                credentials: "include",
+            });
             const data = await response.json();
             console.log(data);
             if (data?.response) {
@@ -94,7 +98,10 @@ export function Chatbot() {
 
     const fetchContextFile = async () => {
         try {
-            const response = await fetch(`${apiRootPath}/context_file`);
+            const response = await fetch(`${apiRootPath}/context_file`,{
+                method: "GET",
+                credentials: "include",
+            });
             const data = await response.json();
 
             if (data?.response) {
@@ -117,12 +124,15 @@ export function Chatbot() {
 
     useEffect(() => {
         const fetchChatHistory = async () => {
+
             try {
-                const response = await fetch(`${apiRootPath}/chat`);
+                const response = await fetch(`${apiRootPath}/chat`, {
+                    method: "GET",
+                    credentials: "include",
+                });
                 const data = await response.json();
 
                 setMessages(data.response.messages);
-                console.log(data.response.messages)
                 if(!models.length){
                     const models = await fetchModels();
                     if(models){
@@ -168,11 +178,15 @@ export function Chatbot() {
                 const requestOptions = {
                     method: "POST",
                     body: formData,
+                    credentials: "include",
                 };
 
-                const response = await fetch(`${apiRootPath}/chat`, requestOptions);
+                const response = await fetch(`${apiRootPath}/chat`, {
+                    ...requestOptions,
+                    credentials: "include" as RequestCredentials,
+                });
                 const data = await response.json();
-                debugger
+
                 if (data && data.response?.messages) {
                     console.log(data.response);
 

@@ -1,13 +1,14 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, File, Form
 from typing import Optional
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
-
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from lib.token import TOKEN_EXPIRATION_MINUTES, create_token, verify_cookie_token
 from lib.utils import invoke_with_metadata, is_image_message, is_image_request
 from init_chatbot import init_chatbot,get_session_history
 from lib.generate_image import generate_image_from_dalle
@@ -28,11 +29,6 @@ session_id = os.getenv('SESSION_ID', 'abc123')
 is_production = ENVIORNMENT == 'production'
 model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
-origins = [
-    "https://app-chatmancer.fly.dev/" if is_production else
-    "http://localhost:5173/"
-]
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,14 +39,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.get('/models')
-async def get_models():
+async def get_models(auth=Depends(verify_cookie_token)):
     client = OpenAI()
     models = client.models.list().model_dump(mode="python")['data']
     non_image_models = [
@@ -59,32 +54,34 @@ async def get_models():
     ]
     return {"response": non_image_models}
 
-@app.get("/chat")
-async def get_chat():
-    history = get_session_history(session_id)
-
+def get_chat_history(id):
+    history = get_session_history(id)
     return {
-        "response": {
-            "messages": [
-                {
-                    "type": msg["type"],
-                    "content": msg["content"],
-                    "content_type": msg.get("content_type", "image" if is_image_message(msg["content"]) else "text"),
-                    "model": msg.get("model", "unknown")
-                }
-                for msg in history.messages
-            ]
-        }
+        "messages": [
+            {
+                "type": msg["type"],
+                "content": msg["content"],
+                "content_type": msg.get("content_type", "image" if is_image_message(msg["content"]) else "text"),
+                "model": msg.get("model", "unknown")
+            }
+            for msg in history.messages
+        ]
     }
+
+@app.get("/chat")
+async def get_chat(auth=Depends(verify_cookie_token)):
+    data = get_chat_history(session_id)
+
+    return {"response": data}
 
 loaded_file = None
 @app.get("/context_file")
-async def get_context_file():
+async def get_context_file(auth=Depends(verify_cookie_token)):
     global loaded_file
     return {"response": loaded_file}
 
 @app.post("/clear_context_file")
-async def reset_context_file():
+async def reset_context_file(auth=Depends(verify_cookie_token)):
     global loaded_file
     if loaded_file is not None:
         try:
@@ -100,6 +97,7 @@ async def post_chat(
     question: str = Form(...),
     file: Optional[UploadFile] = File(None),
     selected_model: Optional[str] = Form(None),
+    auth=Depends(verify_cookie_token)
 ):
     try:
         global loaded_file
@@ -153,7 +151,7 @@ async def post_chat(
                 content_type="text"
             )
 
-        res = await get_chat()
+        res = get_chat_history(session_id)
         return res
     except Exception as e:
         print(e)
@@ -169,7 +167,17 @@ async def verify_password(password_in: PasswordIn):
     correct_password = PASSWORD
 
     if password_in.password == correct_password:
-        return {"message": "Password verified successfully."}
+        token = create_token()
+        response = JSONResponse(content={"message": "Password verified"})
+        response.set_cookie(
+            key="chat_token",
+            value=token,
+            httponly=True,
+            secure=is_production,
+            samesite="strict",
+            max_age=TOKEN_EXPIRATION_MINUTES * 60
+        )
+        return response
     else:
         raise HTTPException(status_code=400, detail=":(")
 
