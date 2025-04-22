@@ -1,8 +1,9 @@
 # ChatMancer
 
 ## Demo
+[![Watch the demo](https://img.youtube.com/vi/kge54-PCwww/maxresdefault.jpg)](https://youtu.be/kge54-PCwww)
 
-https://github.com/alexbenko/AskGPT/assets/37863173/d4b3dff5-e4cc-40fa-b94e-7e422c63ef57
+
 
 ## 🔑 Highlights:
 ✍️ Contextual Conversations – remembers your chat history across messages
