@@ -19,9 +19,10 @@ import { LoadingButton } from "@mui/lab";
 
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import apiPath from "../../lib/apiPath";
-import Message, { MessageList } from "./Message";
+import Message from "./Message";
 import ChatInput from "./ChatInput";
 import useNotification from "../../hooks/useNotification";
+import VirtualMessageList from "./MessageList";
 
 export interface ChatMessage {
     type: "human" | "ai";
@@ -273,7 +274,7 @@ export function Chatbot() {
                     </Box>
                 )}
 
-                <MessageList messages={messages} />
+                <VirtualMessageList messages={messages} />
 
                 <div ref={messagesEndRef} />
 

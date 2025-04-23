@@ -6,7 +6,6 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 import useNotification from "../../hooks/useNotification";
-import { ChatMessage } from "./Chatbot";
 
 interface MessageProps {
     content: string;
@@ -126,15 +125,3 @@ const Message: React.FC<MessageProps> = ({ content }) => {
 };
 
 export default Message;
-
-const MessageList = React.memo(({ messages }: { messages: ChatMessage[] }) => {
-    return (
-        <Box sx={{ overflowY: "auto", maxHeight: "65vh", px: 2 }}>
-            {messages.map((msg, index) => (
-                <ChatMessage key={index} message={msg} />
-            ))}
-        </Box>
-    );
-});
-
-export { MessageList };
