@@ -1,38 +1,39 @@
-import { useMemo } from 'react'
-import './App.css'
-import { useMediaQuery, createTheme, ThemeProvider, CssBaseline } from '@mui/material'
-import { SnackbarOrigin, SnackbarProvider } from 'notistack'
-import useIsMobile from './hooks/useIsMobile'
-import Index from './pages'
-import PasswordProtected from './components/PasswordProtected'
+import { useMemo } from "react";
+import "./App.css";
+import { useMediaQuery, createTheme, ThemeProvider, CssBaseline } from "@mui/material";
+import { SnackbarOrigin, SnackbarProvider } from "notistack";
+import useIsMobile from "./hooks/useIsMobile";
+import Index from "./pages";
+import PasswordProtected from "./components/PasswordProtected";
 
 function App() {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
-        },
-      }),
-    [prefersDarkMode],
-  );
-  const isMobile = useIsMobile()
+    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+    const theme = useMemo(
+        () =>
+            createTheme({
+                palette: {
+                    mode: prefersDarkMode ? "dark" : "light",
+                },
+            }),
+        [prefersDarkMode],
+    );
+    const isMobile = useIsMobile();
 
-  const snackConfig: SnackbarOrigin = isMobile ?
-    { vertical: 'top', horizontal: 'center' }  :
-    { vertical: 'bottom',horizontal: 'right'}
+    const snackConfig: SnackbarOrigin =
+        isMobile ?
+            { vertical: "top", horizontal: "center" }
+        :   { vertical: "bottom", horizontal: "right" };
 
-  return (
-    <ThemeProvider theme={theme}>
-      <SnackbarProvider maxSnack={3} anchorOrigin={snackConfig}>
-        <CssBaseline />
-          <PasswordProtected>
-            <Index />
-          </PasswordProtected>
-      </SnackbarProvider>
-    </ThemeProvider>
-  )
+    return (
+        <ThemeProvider theme={theme}>
+            <SnackbarProvider maxSnack={3} anchorOrigin={snackConfig}>
+                <CssBaseline />
+                <PasswordProtected>
+                    <Index />
+                </PasswordProtected>
+            </SnackbarProvider>
+        </ThemeProvider>
+    );
 }
 
-export default App
+export default App;

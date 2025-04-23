@@ -1,17 +1,14 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
     Avatar,
     Box,
     Chip,
     Container,
     FormControl,
-    IconButton,
-    InputAdornment,
     InputLabel,
     MenuItem,
     Paper,
     Select,
-    TextField,
     Tooltip,
     Typography,
     SelectChangeEvent,
@@ -19,11 +16,12 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import CircularProgress from "@mui/material/CircularProgress";
 import { LoadingButton } from "@mui/lab";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import useNotification from "../hooks/useNotification";
-import Message from "./Message";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import apiPath from "../lib/apiPath";
+
+import { useLocalStorage } from "../../hooks/useLocalStorage";
+import apiPath from "../../lib/apiPath";
+import Message, { MessageList } from "./Message";
+import ChatInput from "./ChatInput";
+import useNotification from "../../hooks/useNotification";
 
 export interface ChatMessage {
     type: "human" | "ai";
@@ -164,10 +162,12 @@ export function Chatbot() {
         fetchContextFile();
     }, []);
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setInputValue(value);
-    };
+    const handleInputChange = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            setInputValue(event.target.value);
+        },
+        [],
+    );
 
     const handleSendMessage = async () => {
         const trimmedInput = inputValue.trim();
@@ -272,9 +272,8 @@ export function Chatbot() {
                         </Typography>
                     </Box>
                 )}
-                {messages.map((message, index) => (
-                    <ChatMessage key={index} message={message} />
-                ))}
+
+                <MessageList messages={messages} />
 
                 <div ref={messagesEndRef} />
 
@@ -297,40 +296,15 @@ export function Chatbot() {
                     />
                 )}
 
-                <TextField
-                    disabled={loading}
-                    fullWidth
-                    multiline
-                    label="Type your message"
-                    variant="outlined"
-                    value={inputValue}
-                    onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
-                            event.preventDefault();
-                            handleSendMessage();
-                        }
-                    }}
-                    onChange={handleInputChange}
-                    InputProps={{
-                        startAdornment: !contextFile && (
-                            <InputAdornment position="start">
-                                <IconButton onClick={handleUploadClick} edge="start">
-                                    <AttachFileIcon />
-
-                                    <input
-                                        disabled={!!contextFile}
-                                        type="file"
-                                        id="file-upload-input"
-                                        style={{ display: "none" }}
-                                        onChange={handleFileChange}
-                                        accept=".pdf"
-                                        max={1}
-                                        key={fileInputKey}
-                                    />
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
+                <ChatInput
+                    inputValue={inputValue}
+                    handleInputChange={handleInputChange}
+                    handleSendMessage={handleSendMessage}
+                    loading={loading}
+                    fileInputKey={fileInputKey}
+                    handleUploadClick={handleUploadClick}
+                    handleFileChange={handleFileChange}
+                    contextFile={contextFile}
                 />
 
                 <LoadingButton
@@ -459,3 +433,5 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         </Box>
     );
 };
+
+export { ChatMessage };

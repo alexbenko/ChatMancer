@@ -1,6 +1,6 @@
 from init_chatbot import init_chatbot
 from lib.session import get_session_history
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 from langchain_core.runnables import Runnable
 
 
@@ -30,6 +30,7 @@ def invoke_with_metadata(
     model: str,
     content_type: str = "text",
     api_key: str = None,
+    override_response: Optional[str] = None,
 ):
     # Get chat history
     history = get_session_history(session_id)
@@ -41,8 +42,12 @@ def invoke_with_metadata(
 
     chain = model_chain_cache[cache_key]
 
-    # Run and log
-    response = chain.invoke({"question": question, "chat_history": history.messages})
+    if override_response is not None:
+        response = override_response
+    else:
+        response = chain.invoke(
+            {"question": question, "chat_history": history.messages}
+        )
 
     history.add_user_message(question)
     history.add_ai_message(

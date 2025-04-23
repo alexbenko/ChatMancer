@@ -7,8 +7,9 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
+import shutil
 from fastapi.middleware.cors import CORSMiddleware
-from lib.chatbot import run_image_q_and_a
+from lib.chatbot import handle_pdf_question, run_image_q_and_a
 from lib.session import get_session_history
 from lib.token import (
     TOKEN_EXPIRATION_MINUTES,
@@ -19,8 +20,7 @@ from lib.token import (
 )
 from lib.utils import invoke_with_metadata, is_image_message, is_image_request
 from lib.generate_image import generate_image_from_dalle
-from lib.retriever import get_cached_pdf_retriever, run_document_q_and_a
-import shutil
+
 from lib.context import UPLOADED_IMAGES, get_image
 
 
@@ -145,54 +145,43 @@ async def post_chat(
 
         image_path = get_image(session_id)
         if image_path:
-            image_response = run_image_q_and_a(
+            run_image_q_and_a(
                 image_path=image_path,
                 question=question,
                 model=current_model,
                 session_id=session_id,
+                vision_model="gpt-4-vision-preview",
+                api_key=OPENAI_API_KEY,
             )
 
-            history = get_session_history(session_id)
-            history.add_user_message(question)
-            history.add_ai_message(
-                image_response, model=current_model, content_type="text"
-            )
         # 2. Handle image generation
         elif is_image_request(question):
             image_desc = question.strip()
             image_url = generate_image_from_dalle(image_desc)
 
             ai_response = f"Here is the image you requested: {image_url}"
-
-            history = get_session_history(session_id)
-            history.add_user_message(question)
-            history.add_ai_message(
-                ai_response, model=current_model, content_type="image"
-            )
-        # 3. Try PDF Q&A if a PDF is loaded
-        elif loaded_file:
-            retriever = get_cached_pdf_retriever(OPENAI_API_KEY, file_path=loaded_file)
-            relevant_docs = relevant_docs = retriever.invoke(question)
-
-            if relevant_docs:
-                history = get_session_history(session_id)
-                history.add_user_message(question)
-
-                ai_response = run_document_q_and_a(
-                    retriever=retriever,
-                    query=question,
-                    session_id=session_id,
-                    model=current_model,
-                )
-
-                history.add_ai_message(
-                    ai_response, model=current_model, content_type="text"
-                )
-        else:
-            ai_response = invoke_with_metadata(
+            invoke_with_metadata(
                 question=question,
                 session_id=session_id,
                 model=current_model,
+                api_key=OPENAI_API_KEY,
+                content_type="image",
+                override_response=ai_response,
+            )
+        # 3. Try PDF Q&A if a PDF is loaded
+        elif loaded_file:
+            handle_pdf_question(
+                question=question,
+                session_id=session_id,
+                model=current_model,
+                file_path=loaded_file,
+            )
+        else:
+            invoke_with_metadata(
+                question=question,
+                session_id=session_id,
+                model=current_model,
+                api_key=OPENAI_API_KEY,
                 content_type="text",
             )
 
