@@ -157,9 +157,8 @@ async def post_chat(
             history.add_ai_message(
                 image_response, model=current_model, content_type="text"
             )
-
         # 2. Handle image generation
-        if is_image_request(question):
+        elif is_image_request(question):
             image_desc = question.strip()
             image_url = generate_image_from_dalle(image_desc)
 

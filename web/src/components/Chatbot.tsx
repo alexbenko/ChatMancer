@@ -14,15 +14,16 @@ import {
     TextField,
     Tooltip,
     Typography,
-    SelectChangeEvent
+    SelectChangeEvent,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import CircularProgress from "@mui/material/CircularProgress";
 import { LoadingButton } from "@mui/lab";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import useNotification from "../hooks/useNotification";
-import  Message  from "./Message";
+import Message from "./Message";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import apiPath from "../lib/apiPath";
 
 export interface ChatMessage {
     type: "human" | "ai";
@@ -35,8 +36,7 @@ export interface ChatMessageProps {
     message: ChatMessage;
 }
 
-const isProduction = import.meta.env.MODE === "production";
-const apiRootPath = isProduction ? "" : "/api";
+const { isProduction, apiRootPath } = apiPath();
 
 export function Chatbot() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -45,7 +45,7 @@ export function Chatbot() {
     const [error, setError] = useState<string | null>(null);
     const [info, setInfo] = useState<string | null>(null);
     const [contextFile, setContextFile] = useState<string | null>(null);
-    const [csrfToken] = useLocalStorage<string | null>('csrfToken', null);
+    const [csrfToken] = useLocalStorage<string | null>("csrfToken", null);
 
     const sendNotification = useNotification();
     const defaultModel = isProduction ? "gpt-4" : "gpt-3.5-turbo";
@@ -67,8 +67,8 @@ export function Chatbot() {
                 method: "POST",
                 credentials: "include",
                 headers: {
-                    "x-csrf-token": csrfToken!
-                }
+                    "x-csrf-token": csrfToken!,
+                },
             });
 
             const data = await response.json();
@@ -90,29 +90,28 @@ export function Chatbot() {
                 method: "GET",
                 credentials: "include",
                 headers: {
-                    "x-csrf-token": csrfToken!
-                }
-
+                    "x-csrf-token": csrfToken!,
+                },
             });
             const data = await response.json();
 
             if (data?.response) {
-                return data.response
+                return data.response;
             }
         } catch (error) {
             console.error("Error fetching models:", error);
             setError("An error occurred while fetching models.");
         }
-    }
+    };
 
     const fetchContextFile = async () => {
         try {
-            const response = await fetch(`${apiRootPath}/context_file`,{
+            const response = await fetch(`${apiRootPath}/context_file`, {
                 method: "GET",
                 credentials: "include",
                 headers: {
-                    "x-csrf-token": csrfToken!
-                }
+                    "x-csrf-token": csrfToken!,
+                },
             });
             const data = await response.json();
 
@@ -126,35 +125,35 @@ export function Chatbot() {
         }
     };
 
-
     const handleModelChange = (event: SelectChangeEvent<string>) => {
         setSelectedModel(event.target.value);
     };
 
-    const [selectedModel, setSelectedModel] = useLocalStorage<string|undefined>('selectedModel', undefined);
-    const [models, setModels] = useLocalStorage("models",[]);
+    const [selectedModel, setSelectedModel] = useLocalStorage<string | undefined>(
+        "selectedModel",
+        undefined,
+    );
+    const [models, setModels] = useLocalStorage("models", []);
 
     useEffect(() => {
         const fetchChatHistory = async () => {
-
             try {
                 const response = await fetch(`${apiRootPath}/chat`, {
                     method: "GET",
                     credentials: "include",
                     headers: {
-                        "x-csrf-token": csrfToken!
-                    }
+                        "x-csrf-token": csrfToken!,
+                    },
                 });
                 const data = await response.json();
                 debugger;
                 setMessages(data.response.messages);
-                if(!models.length){
+                if (!models.length) {
                     const models = await fetchModels();
-                    if(models){
+                    if (models) {
                         setModels(models);
                     }
                 }
-
             } catch (error) {
                 console.error("Error fetching chat history:", error);
                 setError("An error occurred while fetching chat history.");
@@ -164,10 +163,6 @@ export function Chatbot() {
         fetchChatHistory();
         fetchContextFile();
     }, []);
-
-    useEffect(() => {
-        fetchContextFile();
-    }, [messages]);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -183,7 +178,7 @@ export function Chatbot() {
                 const formData = new FormData();
                 formData.append("question", trimmedInput);
 
-                if(selectedModel){
+                if (selectedModel) {
                     formData.append("selected_model", selectedModel);
                 }
 
@@ -195,24 +190,22 @@ export function Chatbot() {
                     body: formData,
                     credentials: "include",
                     headers: {
-                        "x-csrf-token": csrfToken!
-                    }
+                        "x-csrf-token": csrfToken!,
+                    },
                 };
 
                 const response = await fetch(`${apiRootPath}/chat`, {
                     ...requestOptions,
                     credentials: "include" as RequestCredentials,
-
                 });
                 const data = await response.json();
-                debugger
-                if (data && data?.messages) {
-                    console.log(data.response);
 
-                    setMessages(() => [
-                        ...data.messages,
-                    ]);
-                    if (file) setFile(null);
+                if (data && data?.messages) {
+                    setMessages(() => [...data.messages]);
+                    if (file) {
+                        setFile(null);
+                        await fetchContextFile();
+                    }
                 } else {
                     setError("Error sending message.");
                     console.error("Error:", data);
@@ -351,8 +344,10 @@ export function Chatbot() {
                 </LoadingButton>
             </Box>
             <Box sx={{ display: "flex", marginTop: "10px", gap: "10px" }}>
-                <Tooltip title={`Change the model on the next request. Otherwise it will use ${defaultModel}`}   >
-                    <FormControl sx={{width:'50%'}} variant="standard">
+                <Tooltip
+                    title={`Change the model on the next request. Otherwise it will use ${defaultModel}`}
+                >
+                    <FormControl sx={{ width: "50%" }} variant="standard">
                         <InputLabel id="model-select-label">Select Model</InputLabel>
                         <Select
                             labelId="model-select-label"
@@ -413,7 +408,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 maxWidth: "90%",
             }}
         >
-            {message.content_type === 'image' ?
+            {message.content_type === "image" ?
                 <>
                     <Typography variant="body1" gutterBottom>
                         Here is the image you requested:
@@ -438,8 +433,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                         </a>
                     </Tooltip>
                 </>
-            :   <Message content={message.content} />
-            }
+            :   <Message content={message.content} />}
             <Avatar alt={senderName} src={avatarSrc} />
             <Typography
                 variant="subtitle2"
