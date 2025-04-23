@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 from fastapi.middleware.cors import CORSMiddleware
+from lib.chatbot import run_image_q_and_a
 from lib.session import get_session_history
 from lib.token import (
     TOKEN_EXPIRATION_MINUTES,
@@ -19,6 +20,8 @@ from lib.token import (
 from lib.utils import invoke_with_metadata, is_image_message, is_image_request
 from lib.generate_image import generate_image_from_dalle
 from lib.retriever import get_cached_pdf_retriever, run_document_q_and_a
+import shutil
+from lib.context import UPLOADED_IMAGES, get_image
 
 
 class ChatIn(BaseModel):
@@ -140,6 +143,21 @@ async def post_chat(
                 f.write(contents)
             loaded_file = file.filename
 
+        image_path = get_image(session_id)
+        if image_path:
+            image_response = run_image_q_and_a(
+                image_path=image_path,
+                question=question,
+                model=current_model,
+                session_id=session_id,
+            )
+
+            history = get_session_history(session_id)
+            history.add_user_message(question)
+            history.add_ai_message(
+                image_response, model=current_model, content_type="text"
+            )
+
         # 2. Handle image generation
         if is_image_request(question):
             image_desc = question.strip()
@@ -186,6 +204,36 @@ async def post_chat(
         raise HTTPException(
             status_code=500, detail="An error occurred while processing your request."
         )
+
+
+@app.get("/image_file")
+async def get_uploaded_image(
+    auth=Depends(verify_cookie_token),
+    csrf=Depends(verify_csrf_cookie),
+):
+    image_path = get_image(session_id)
+    return {"response": image_path}
+
+
+@app.post("/upload_image")
+async def upload_image(
+    file: UploadFile = File(...),
+    auth=Depends(verify_cookie_token),
+    csrf=Depends(verify_csrf_cookie),
+):
+    if not file.filename.lower().endswith((".jpg", ".jpeg", ".png")):
+        raise HTTPException(
+            status_code=400, detail="Only JPG and PNG files are supported."
+        )
+
+    file_path = f"uploaded_images/{session_id}_{file.filename}"
+    os.makedirs("uploaded_images", exist_ok=True)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    UPLOADED_IMAGES[session_id] = file_path
+    return {"response": f"Image '{file.filename}' uploaded successfully."}
 
 
 class PasswordIn(BaseModel):
