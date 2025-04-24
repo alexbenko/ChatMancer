@@ -123,6 +123,7 @@ async def reset_context_file(
     return {"response": "Context file has been reset"}
 
 
+# TODO IF user data is stored in a db, add a depend to get session_id
 @app.post("/chat")
 async def post_chat(
     question: str = Form(...),
@@ -155,7 +156,7 @@ async def post_chat(
             )
 
         # 2. Handle image generation
-        elif is_image_request(question):
+        elif is_image_request(question, llm=is_production):
             image_desc = question.strip()
             image_url = generate_image_from_dalle(image_desc)
 

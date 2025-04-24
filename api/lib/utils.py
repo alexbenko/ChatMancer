@@ -1,16 +1,43 @@
+from langchain_openai import ChatOpenAI
 from init_chatbot import init_chatbot
 from lib.session import get_session_history
 from typing import Dict, Optional, Tuple
 from langchain_core.runnables import Runnable
 
 
-def is_image_request(text: str) -> bool:
+def is_image_request_gpt(question: str, model: str = "gpt-3.5-turbo") -> bool:
+    llm = ChatOpenAI(model=model, temperature=0)
+
+    prompt = [
+        {
+            "role": "system",
+            "content": (
+                "You are a helpful classifier. Return ONLY 'yes' if the user's message "
+                "is asking for an image to be generated, or 'no' if not. Do not explain."
+            ),
+        },
+        {"role": "user", "content": question},
+    ]
+
+    response = llm.invoke(prompt)
+    answer = response.content.strip().lower()
+
+    return "yes" in answer
+
+
+def is_image_request(text: str, llm=False) -> bool:
+    if llm:
+        try:
+            is_image = is_image_request_gpt(text)
+            return is_image
+        except Exception as e:
+            print(f"Error in is_image_request_gpt: {e}")
+            print("Falling back to keyword check...")
+
     keywords = [
         "draw",
         "sketch",
         "generate image",
-        "picture of",
-        "show me",
         "visualize",
         "illustration of",
     ]
