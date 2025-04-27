@@ -6,11 +6,9 @@ from langchain.prompts import (
     ChatPromptTemplate,
     MessagesPlaceholder,
 )
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from typing import Dict
 from langchain.schema.vectorstore import VectorStoreRetriever
-from langchain_core.runnables import RunnablePassthrough
 
+from langchain.community.chains import ConversationalRetrievalChain
 from lib.session import get_session_history
 
 
@@ -36,37 +34,53 @@ def get_cached_pdf_retriever(
 
 
 def run_document_q_and_a(
-    retriever, query: str, session_id: str = "abc123", model="gpt-3.5-turbo"
+    retriever,
+    query: str,
+    session_id: str = "abc123",
+    model: str = "gpt-3.5-turbo",
 ):
+    # 1) grab your chat history however you store it
     history = get_session_history(session_id)
+
+    # 2) build your ChatOpenAI client
     chat = ChatOpenAI(model=model)
 
-    question_answering_prompt = ChatPromptTemplate.from_messages(
+    # 3) re-use your QA prompt
+    qa_prompt = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
                 (
-                    "You are a helpful assistant. Answer the user's question using only the information "
-                    "provided in the PDF context below.\n\n"
+                    "You are a helpful assistant. Answer the user's question using only the "
+                    "information provided in the PDF context below.\n\n"
                     "Context:\n{context}\n\n"
-                    "If the answer is not explicitly found in the context, say 'I'm not sure based on the provided document.' "
-                    "Be as concise and accurate as possible. Do not make up facts."
+                    "If the answer is not explicitly found in the context, say "
+                    "'I'm not sure based on the provided document.' Be as concise and accurate "
+                    "as possible. Do not make up facts."
                 ),
             ),
-            MessagesPlaceholder(variable_name="messages"),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("user", "{question}"),
         ]
     )
 
-    document_chain = create_stuff_documents_chain(chat, question_answering_prompt)
-
-    def parse_retriever_input(params: Dict):
-        return params["messages"][-1].get("content")
-
-    retrieval_chain = (
-        RunnablePassthrough.assign(context=parse_retriever_input | retriever)
-        | document_chain
+    # 4) wire up the ConversationalRetrievalChain
+    qa_chain = ConversationalRetrievalChain.from_llm(
+        llm=chat,
+        retriever=retriever,
+        qa_prompt=qa_prompt,
+        # this tells it which keys to expect/return
+        input_key="question",
+        # omit source docs from the output for brevity
+        return_source_documents=False,
     )
 
-    response = retrieval_chain.invoke({"messages": history.messages})
-
-    return response
+    # 5) invoke with your query + existing history
+    result = qa_chain(
+        {
+            "question": query,
+            "chat_history": history.messages,
+        }
+    )
+    # result is a dict like {"answer": "...", ...}
+    return result["answer"]
