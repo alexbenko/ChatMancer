@@ -45,7 +45,13 @@ def run_document_q_and_a(
         [
             (
                 "system",
-                "Answer the user's questions based on the below context from a pdf file:\n\n{context}",
+                (
+                    "You are a helpful assistant. Answer the user's question using only the information "
+                    "provided in the PDF context below.\n\n"
+                    "Context:\n{context}\n\n"
+                    "If the answer is not explicitly found in the context, say 'I'm not sure based on the provided document.' "
+                    "Be as concise and accurate as possible. Do not make up facts."
+                ),
             ),
             MessagesPlaceholder(variable_name="messages"),
         ]

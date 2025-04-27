@@ -3,6 +3,8 @@ from init_chatbot import init_chatbot
 from lib.session import get_session_history
 from typing import Dict, Optional, Tuple
 from langchain_core.runnables import Runnable
+from bs4 import BeautifulSoup
+import requests
 
 
 def is_image_request_gpt(question: str, model: str = "gpt-3.5-turbo") -> bool:
@@ -84,3 +86,15 @@ def invoke_with_metadata(
     )
 
     return response
+
+
+def extract_text_from_url(url: str) -> str:
+    response = requests.get(url, timeout=5)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # Remove scripts/styles
+    for tag in soup(["script", "style"]):
+        tag.decompose()
+
+    text = soup.get_text(separator="\n")
+    return text.strip()
