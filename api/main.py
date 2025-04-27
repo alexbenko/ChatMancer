@@ -260,6 +260,14 @@ async def verify_password(password_in: PasswordIn):
         raise HTTPException(status_code=400, detail=":(")
 
 
+@app.get("/verify-token")
+async def verify_token(
+    auth=Depends(verify_cookie_token),
+    csrf=Depends(verify_csrf_cookie),
+):
+    return {"message": "Token valid"}
+
+
 if is_production:
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 

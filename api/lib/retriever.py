@@ -46,10 +46,11 @@ def run_document_q_and_a(
                 (
                     "You are a helpful assistant. Answer the user's question "
                     "using only the information provided in the PDF context below.\n\n"
-                    "Context:\n{context}\n\n"
                     "If the answer is not explicitly found in the context, "
                     "say 'I'm not sure based on the provided document.' "
                     "Be concise and do not invent facts."
+                    "------------------------------------\n"
+                    "Context:\n{context}\n\n"
                 ),
             ),
             ("user", "{query}"),

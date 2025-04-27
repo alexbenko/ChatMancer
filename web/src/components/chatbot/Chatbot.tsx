@@ -12,10 +12,10 @@ import {
     Tooltip,
     Typography,
     SelectChangeEvent,
+    Button,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import CircularProgress from "@mui/material/CircularProgress";
-import { LoadingButton } from "@mui/lab";
 
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import apiPath from "../../lib/apiPath";
@@ -308,7 +308,7 @@ export function Chatbot() {
                     contextFile={contextFile}
                 />
 
-                <LoadingButton
+                <Button
                     loading={loading}
                     disabled={!inputValue || loading}
                     variant="contained"
@@ -316,7 +316,7 @@ export function Chatbot() {
                     onClick={handleSendMessage}
                 >
                     <SendIcon />
-                </LoadingButton>
+                </Button>
             </Box>
             <Box sx={{ display: "flex", marginTop: "10px", gap: "10px" }}>
                 <Tooltip
@@ -328,7 +328,6 @@ export function Chatbot() {
                             labelId="model-select-label"
                             value={selectedModel || ""}
                             onChange={handleModelChange}
-                            displayEmpty
                         >
                             <MenuItem value={undefined} disabled>
                                 Select a model
