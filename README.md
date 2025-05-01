@@ -75,7 +75,7 @@ In your `.env` file under `/api`:
 Your OpenAI API key. Required for GPT and DALL-E access.
 
 ### `PASSWORD`
-Password protection for the app interface (basic access control).
+Password protection for the app interface (basic access control). Passwords need to be encrypted using /api/lib/pass.py
 
 ## Project Setup With Docker
 
