@@ -2,9 +2,11 @@ from langchain_openai import ChatOpenAI
 from init_chatbot import init_chatbot
 from lib.session import get_session_history
 from typing import Dict, Optional, Tuple
-from langchain_core.runnables import Runnable
 from bs4 import BeautifulSoup
 import requests
+import os
+from langchain_core.runnables.base import RunnableSerializable
+from langchain_core.messages import BaseMessage
 
 
 def is_image_request_gpt(question: str, model: str = "gpt-3.5-turbo") -> bool:
@@ -50,7 +52,21 @@ def is_image_message(content: str) -> bool:
     return content.strip().startswith("Here is the image you requested:")
 
 
-model_chain_cache: Dict[Tuple[str, str], Runnable] = {}
+model_chain_cache: Dict[
+    Tuple[str, str, bool], tuple[RunnableSerializable[dict, BaseMessage], ChatOpenAI]
+] = {}
+
+
+def get_chatbot(
+    session_id: str,
+    model: str,
+    api_key: str = os.getenv("OPENAI_API_KEY"),
+    stream=False,
+):
+    cache_key = (session_id, model, stream)
+    if cache_key not in model_chain_cache:
+        model_chain_cache[cache_key] = init_chatbot(api_key, model)
+    return model_chain_cache[cache_key]
 
 
 def invoke_with_metadata(
@@ -63,13 +79,7 @@ def invoke_with_metadata(
 ):
     # Get chat history
     history = get_session_history(session_id)
-    cache_key = (session_id, model)
-
-    # Reuse or create chain
-    if cache_key not in model_chain_cache:
-        model_chain_cache[cache_key] = init_chatbot(api_key, model)
-
-    chain = model_chain_cache[cache_key]
+    chain, _ = get_chatbot(session_id, model, api_key)
 
     if override_response is not None:
         response = override_response
@@ -85,7 +95,7 @@ def invoke_with_metadata(
         content_type=content_type,
     )
 
-    return response
+    return history
 
 
 def extract_text_from_url(url: str) -> str:

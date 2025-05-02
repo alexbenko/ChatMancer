@@ -31,7 +31,7 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
             try {
                 if (!csrfToken) return;
 
-                const response = await fetch("/verify-token", {
+                const response = await fetch(apiRootPath + "/verify-token", {
                     method: "GET",
                     credentials: "include",
                     headers: {
@@ -39,18 +39,27 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
                     },
                 });
 
-                if (response.ok) {
-                    setIsAuthenticated(true);
+                setIsAuthenticated(response.ok);
+                if (csrfToken) {
+                    setError("Your session has expired. Please log in again.");
+                } else {
+                    setError("Uh Oh.");
                 }
             } catch (err) {
                 console.error("Silent auth failed:", err);
+                setIsAuthenticated(false);
+                setError("An error occurred.");
             } finally {
                 setLoading(false);
             }
         };
 
         silentVerify();
+
+        const interval = setInterval(silentVerify, 5 * 60 * 1000);
+        return () => clearInterval(interval);
     }, []);
+
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
         setLoading(true);

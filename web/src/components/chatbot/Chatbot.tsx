@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { ChangeEvent, memo, useEffect, useRef, useState } from "react";
 import {
     Avatar,
     Box,
@@ -12,17 +12,15 @@ import {
     Tooltip,
     Typography,
     SelectChangeEvent,
-    Button,
+    FormHelperText,
 } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import CircularProgress from "@mui/material/CircularProgress";
 
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import apiPath from "../../lib/apiPath";
 import Message from "./Message";
 import ChatInput from "./ChatInput";
 import useNotification from "../../hooks/useNotification";
-import VirtualMessageList from "./MessageList";
+import StreamMessage from "./StreamMessage";
 
 export interface ChatMessage {
     type: "human" | "ai";
@@ -33,13 +31,14 @@ export interface ChatMessage {
 
 export interface ChatMessageProps {
     message: ChatMessage;
+    streaming?: boolean;
 }
 
 const { isProduction, apiRootPath } = apiPath();
 
 export function Chatbot() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [inputValue, setInputValue] = useState("");
+    const [streamQuestion, setStreamQuestion] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [info, setInfo] = useState<string | null>(null);
@@ -135,42 +134,48 @@ export function Chatbot() {
     const [models, setModels] = useLocalStorage("models", []);
 
     useEffect(() => {
-        const fetchChatHistory = async () => {
-            try {
-                const response = await fetch(`${apiRootPath}/chat`, {
-                    method: "GET",
-                    credentials: "include",
-                    headers: {
-                        "x-csrf-token": csrfToken!,
-                    },
-                });
-                const data = await response.json();
-                debugger;
-                setMessages(data.response.messages);
-                if (!models.length) {
-                    const models = await fetchModels();
-                    if (models) {
-                        setModels(models);
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching chat history:", error);
-                setError("An error occurred while fetching chat history.");
-            }
-        };
-
         fetchChatHistory();
         fetchContextFile();
     }, []);
+    const fetchChatHistory = async () => {
+        try {
+            const response = await fetch(`${apiRootPath}/chat`, {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "x-csrf-token": csrfToken!,
+                },
+            });
+            const data = await response.json();
 
-    const handleInputChange = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            setInputValue(event.target.value);
-        },
-        [],
-    );
+            setMessages(data.response.messages);
+            console.log("Chat history:", data.response.messages);
+            if (!models.length) {
+                const models = await fetchModels();
+                if (models) {
+                    setModels(models);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching chat history:", error);
+            setError("An error occurred while fetching chat history.");
+        }
+    };
 
-    const handleSendMessage = async () => {
+    const handleSendMessage = async (msg: string) => {
+        setLoading(true);
+        setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+                type: "human",
+                content: msg,
+                content_type: "text",
+            },
+        ]);
+        setStreamQuestion(msg); //so the stream isnt rendered until the user sends the message
+
+        return;
+        /**
         const trimmedInput = inputValue.trim();
         if (trimmedInput) {
             try {
@@ -219,6 +224,7 @@ export function Chatbot() {
                 setInputValue("");
             }
         }
+            */
     };
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -237,7 +243,7 @@ export function Chatbot() {
     };
     const [file, setFile] = useState<File | null>(null);
 
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
         const MAX_FILE_SIZE = 250 * 1024 * 1024;
         if (file && file.size > MAX_FILE_SIZE) {
@@ -246,8 +252,32 @@ export function Chatbot() {
             console.log(file);
             setFile(file);
             setInfo("File added successfully.");
-            // Reset the file input after selection
-            setFileInputKey(Date.now());
+            const formData = new FormData();
+            formData.append("file", file);
+            try {
+                const response = await fetch(`${apiRootPath}/upload_file`, {
+                    method: "POST",
+                    body: formData,
+                    credentials: "include",
+                    headers: {
+                        "x-csrf-token": csrfToken!,
+                    },
+                });
+
+                const data = await response.json();
+                if (data?.response) {
+                    setInfo(data.response);
+                    setContextFile(file.name); // Update context file state
+                } else {
+                    setError("Error uploading file.");
+                }
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                setError("An error occurred while uploading the file.");
+            } finally {
+                // Reset the file input after selection
+                setFileInputKey(Date.now());
+            }
         }
     };
 
@@ -274,18 +304,23 @@ export function Chatbot() {
                     </Box>
                 )}
 
-                <VirtualMessageList messages={messages} />
+                {messages.map((message, index) => (
+                    <ChatMessage key={index} message={message} />
+                ))}
+
+                {streamQuestion && (
+                    <StreamMessage
+                        question={streamQuestion}
+                        model={selectedModel ?? defaultModel}
+                        onComplete={() => {
+                            fetchChatHistory();
+                            setLoading(false);
+                            setStreamQuestion(null);
+                        }}
+                    />
+                )}
 
                 <div ref={messagesEndRef} />
-
-                {loading && (
-                    <Box sx={{ display: "flex" }}>
-                        <CircularProgress />
-                        <Typography variant="body1">
-                            Loading ChatMancer Response...
-                        </Typography>
-                    </Box>
-                )}
             </Paper>
 
             <Box sx={{ display: "flex", marginTop: "10px", gap: "10px" }}>
@@ -298,8 +333,6 @@ export function Chatbot() {
                 )}
 
                 <ChatInput
-                    inputValue={inputValue}
-                    handleInputChange={handleInputChange}
                     handleSendMessage={handleSendMessage}
                     loading={loading}
                     fileInputKey={fileInputKey}
@@ -307,41 +340,8 @@ export function Chatbot() {
                     handleFileChange={handleFileChange}
                     contextFile={contextFile}
                 />
+            </Box>
 
-                <Button
-                    loading={loading}
-                    disabled={!inputValue || loading}
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSendMessage}
-                >
-                    <SendIcon />
-                </Button>
-            </Box>
-            <Box sx={{ display: "flex", marginTop: "10px", gap: "10px" }}>
-                <Tooltip
-                    title={`Change the model on the next request. Otherwise it will use ${defaultModel}`}
-                >
-                    <FormControl sx={{ width: "50%" }} variant="standard">
-                        <InputLabel id="model-select-label">Select Model</InputLabel>
-                        <Select
-                            labelId="model-select-label"
-                            value={selectedModel || ""}
-                            onChange={handleModelChange}
-                        >
-                            <MenuItem value={undefined} disabled>
-                                Select a model
-                            </MenuItem>
-                            <MenuItem value={undefined}>Default</MenuItem>
-                            {models.map((model) => (
-                                <MenuItem key={model} value={model}>
-                                    {model}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Tooltip>
-            </Box>
             {contextFile && (
                 <Box>
                     <Typography variant="h6" gutterBottom>
@@ -356,13 +356,37 @@ export function Chatbot() {
                     </Tooltip>
                 </Box>
             )}
+            <Box sx={{ display: "flex", marginTop: "1rem", marginBottom: "1rem" }}>
+                <FormControl sx={{ flexGrow: "1" }} variant="filled">
+                    <InputLabel id="model-select-label">Select Model</InputLabel>
+                    <Select
+                        labelId="model-select-label"
+                        value={selectedModel || ""}
+                        onChange={handleModelChange}
+                    >
+                        <MenuItem value={undefined} disabled>
+                            Select a model
+                        </MenuItem>
+                        <MenuItem value={undefined}>Default</MenuItem>
+                        {models.map((model) => (
+                            <MenuItem key={model} value={model}>
+                                {model}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    <FormHelperText id="my-helper-text">
+                        Select the model to use for the next question. Otherwise the
+                        model will default to {defaultModel}.
+                    </FormHelperText>
+                </FormControl>
+            </Box>
         </Container>
     );
 }
 
 export default Chatbot;
 
-const ChatMessage = ({ message }: ChatMessageProps) => {
+const ChatMessage = memo(({ message, streaming = false }: ChatMessageProps) => {
     const isAIMessage = message.type === "ai";
     const senderName = isAIMessage ? "ChatMancer" : "You";
     const avatarSrc = isAIMessage ? `/chatmancer.webp` : `cat.webp`;
@@ -382,32 +406,8 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 maxWidth: "90%",
             }}
         >
-            {message.content_type === "image" ?
-                <>
-                    <Typography variant="body1" gutterBottom>
-                        Here is the image you requested:
-                    </Typography>
-                    <Tooltip title="Click to view full image">
-                        <a
-                            href={message.content.replace(
-                                "Here is the image you requested: ",
-                                "",
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <Avatar
-                                sx={{ width: 100, height: 100 }}
-                                src={message.content.replace(
-                                    "Here is the image you requested: ",
-                                    "",
-                                )}
-                                alt="Generated"
-                            />
-                        </a>
-                    </Tooltip>
-                </>
-            :   <Message content={message.content} />}
+            <Message content={message.content} streaming={streaming} />
+
             <Avatar alt={senderName} src={avatarSrc} />
             <Typography
                 variant="subtitle2"
@@ -432,6 +432,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             )}
         </Box>
     );
-};
+});
 
 export { ChatMessage };
