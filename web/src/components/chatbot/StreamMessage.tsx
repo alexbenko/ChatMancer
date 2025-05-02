@@ -15,7 +15,7 @@ function subscribeToSSE(url: string, { next }: SWRSubscriptionOptions): () => vo
         console.error("SSE error:", err);
         es.close();
     };
-    es.addEventListener(END_OF_STREAM, (e) => {
+    es.addEventListener(END_OF_STREAM, () => {
         next(null, END_OF_STREAM);
         es.close();
     });
