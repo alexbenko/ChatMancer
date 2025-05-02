@@ -2,9 +2,8 @@ import { FC, memo, useEffect, useState } from "react";
 import useSWRSubscription, { SWRSubscriptionOptions } from "swr/subscription";
 import { Box } from "@mui/material";
 import apiPath from "../../lib/apiPath";
-import Message from "./Message";
 import { ChatMessage } from "./Chatbot";
-const COMPLETE = "__COMPLETE__";
+const END_OF_STREAM = "end_of_stream";
 
 function subscribeToSSE(url: string, { next }: SWRSubscriptionOptions): () => void {
     const es = new EventSource(url, { withCredentials: true });
@@ -16,9 +15,8 @@ function subscribeToSSE(url: string, { next }: SWRSubscriptionOptions): () => vo
         console.error("SSE error:", err);
         es.close();
     };
-    es.addEventListener("end_of_stream", (e) => {
-        console.log("End of stream:", e);
-        next(null, COMPLETE);
+    es.addEventListener(END_OF_STREAM, (e) => {
+        next(null, END_OF_STREAM);
         es.close();
     });
 
@@ -55,7 +53,7 @@ const StreamMessage: FC<StreamingChatMessageProps> = ({
     useEffect(() => {
         if (!chunk) return;
 
-        if (chunk === COMPLETE) {
+        if (chunk === END_OF_STREAM) {
             onComplete?.();
             setText("");
         } else {

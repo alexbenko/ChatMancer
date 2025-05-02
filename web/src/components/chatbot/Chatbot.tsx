@@ -36,7 +36,7 @@ export interface ChatMessageProps {
 
 const { isProduction, apiRootPath } = apiPath();
 
-export function Chatbot() {
+function Chatbot() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [streamQuestion, setStreamQuestion] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -384,7 +384,7 @@ export function Chatbot() {
     );
 }
 
-export default Chatbot;
+export default memo(Chatbot);
 
 const ChatMessage = memo(({ message, streaming = false }: ChatMessageProps) => {
     const isAIMessage = message.type === "ai";

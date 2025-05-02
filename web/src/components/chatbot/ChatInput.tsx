@@ -81,7 +81,7 @@ const ChatInput: FC<ChatInputProps> = memo(
                 <Button
                     disabled={loading}
                     variant="contained"
-                    color="primary"
+                    color="success"
                     onClick={() => {
                         handleSendMessage(inputValue);
                         setInputValue("");

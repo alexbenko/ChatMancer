@@ -1,7 +1,12 @@
-import { Chatbot } from "../components/chatbot/Chatbot";
+import { Container } from "@mui/material";
+import Chatbot from "../components/chatbot/Chatbot";
 
 function Index() {
-    return <Chatbot />;
+    return (
+        <Container maxWidth="xl" sx={{ maxWidth: "90%", m: "0 auto", p: ".5rem" }}>
+            <Chatbot />
+        </Container>
+    );
 }
 
 export default Index;
