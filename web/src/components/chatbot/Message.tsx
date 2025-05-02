@@ -1,18 +1,43 @@
-import React, { useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Typography, IconButton, Tooltip, Box, Container } from "@mui/material";
+import { Typography, IconButton, Tooltip, Box, Container, Avatar } from "@mui/material";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 import useNotification from "../../hooks/useNotification";
-
 interface MessageProps {
     content: string;
+    streaming?: boolean;
 }
 
-const Message: React.FC<MessageProps> = ({ content }) => {
+const Message: FC<MessageProps> = ({ content, streaming = false }) => {
     const sendNotification = useNotification();
+    if (streaming) {
+        return (
+            <Typography variant="body1" gutterBottom>
+                {content}
+            </Typography>
+        );
+    }
+    const dalleImageUrl = useMemo(() => {
+        const urlRegex = /(https?:\/\/[^\s]+)/g; // Regex to match URLs
+        const matches = content.match(urlRegex);
+        return matches?.find((url) => url.includes("dalle")) || null;
+    }, [content]);
+    console.log(content);
+    console.log("Dalle Image URL", dalleImageUrl);
+    if (dalleImageUrl) {
+        return (
+            <Container maxWidth="md">
+                <Avatar
+                    alt="DALL-E Generated Image"
+                    src={dalleImageUrl}
+                    sx={{ width: 128, height: 128 }}
+                />
+            </Container>
+        );
+    }
 
     return (
         <Container maxWidth="md">
@@ -37,10 +62,17 @@ const Message: React.FC<MessageProps> = ({ content }) => {
                         <li style={{ marginBottom: 4 }}>{children}</li>
                     ),
                     code({ node, inline, className, children, ...props }: any) {
+                        console.log("CODE BLOCK");
                         const match = /language-(\w+)/.exec(className || "");
                         const codeString = String(children).replace(/\n$/, "");
 
                         const [copied, setCopied] = useState(false);
+                        useEffect(() => {
+                            if (copied) {
+                                const h = setTimeout(() => setCopied(false), 2000);
+                                return () => clearTimeout(h);
+                            }
+                        }, [copied]);
 
                         const handleCopy = async () => {
                             await navigator.clipboard.writeText(codeString);

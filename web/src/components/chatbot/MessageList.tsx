@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties, FC, memo } from "react";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 
@@ -8,10 +8,10 @@ type VirtualMessageListProps = {
     messages: ChatMessageType[];
 };
 
-const VirtualMessageList: React.FC<VirtualMessageListProps> = ({ messages }) => {
+const VirtualMessageList: FC<VirtualMessageListProps> = ({ messages }) => {
     const itemSize = 120;
 
-    const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => (
+    const Row = ({ index, style }: { index: number; style: CSSProperties }) => (
         <div style={style}>
             <ChatMessage message={messages[index]} />
         </div>
@@ -33,4 +33,4 @@ const VirtualMessageList: React.FC<VirtualMessageListProps> = ({ messages }) => 
     );
 };
 
-export default React.memo(VirtualMessageList);
+export default memo(VirtualMessageList);
