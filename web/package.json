@@ -16,6 +16,8 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
+    "@react-three/drei": "^10.0.7",
+    "@react-three/fiber": "^9.1.2",
     "framer-motion": "^12.9.2",
     "notistack": "^3.0.2",
     "react": "^19.1.0",
@@ -25,6 +27,7 @@
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^1.8.11",
     "swr": "^2.3.3",
+    "three": "^0.176.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {

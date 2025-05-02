@@ -1,6 +1,8 @@
 import { TextField, Typography, Box, Button } from "@mui/material";
-import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, memo, ReactNode, useEffect, useState } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import NetworkGraph from "./other/NetworkGraph";
+import { Canvas } from "@react-three/fiber";
 interface PasswordProtectedProps {
     children: ReactNode;
 }
@@ -96,32 +98,64 @@ function PasswordProtected({ children }: PasswordProtectedProps) {
     }
 
     return (
-        <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-                minHeight: "100vh",
-                margin: "0 auto",
-                justifyContent: "center", // Vertically aligns the form to the center
-                alignItems: "center", // Horizontally aligns the form to the center
-            }}
-        >
-            <TextField
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                label="Password"
-                autoComplete="current-password"
-            />
-            <Button loading={loading} type="submit">
-                Submit
-            </Button>
-            {error && <Typography color="error">{error}</Typography>}
+        <Box sx={{ position: "relative", width: "100vw", height: "100vh" }}>
+            <Canvas
+                style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                }}
+                camera={{ position: [0, 0, 5], fov: 60 }}
+                gl={{ antialias: true }}
+            >
+                <ambientLight intensity={0.5} />
+                <NetworkGraph />
+            </Canvas>
+
+            <Box
+                component="form"
+                onSubmit={handleSubmit}
+                sx={{
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1rem",
+                    width: "100%",
+                    maxWidth: 400,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    margin: "0 auto",
+                    textAlign: "center",
+                    top: "35%",
+                    background: "black",
+                    p: 4,
+                    borderRadius: 2,
+                }}
+            >
+                <TextField
+                    type="password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    label="Password"
+                    variant="filled"
+                    fullWidth
+                    autoComplete="current-password"
+                />
+                <Button
+                    color="success"
+                    loading={loading}
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                >
+                    Log In
+                </Button>
+                {error && <Typography color="error">{error}</Typography>}
+            </Box>
         </Box>
     );
 }
 
-export default PasswordProtected;
+export default memo(PasswordProtected);
