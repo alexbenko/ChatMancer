@@ -52,7 +52,7 @@ ChatMancer is a full-stack app powered by large language models (LLMs) that deli
 
 ## Future Features
 
-1. <strike>Text file upload support</strike>
+1. <strike>Text file upload and QA support (RAG)</strike>
 2. Add support for pulling content from URLs
 3. GPT Vision / image Q&A support
 4. <strike>Persistent model selection with historical tracking</strike> 
