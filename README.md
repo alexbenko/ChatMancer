@@ -57,7 +57,7 @@ ChatMancer is a full-stack app powered by large language models (LLMs) that deli
 3. GPT Vision / image Q&A support
 4. <strike>Persistent model selection with historical tracking</strike> 
 5. <strike>Response streaming.</strike> 
-
+6. Migrate to Langgraph
 ## Usage Costs
 
 This project uses OpenAI's APIs, which are not free. Costs depend on:
